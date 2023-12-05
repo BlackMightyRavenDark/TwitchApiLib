@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33712.159
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchApiLib", "TwitchApiLib\TwitchApiLib.csproj", "{61B3455C-E099-44E4-93E6-5178A7972704}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchApiLib.ConsoleTest", "TwitchApiLib.ConsoleTest\TwitchApiLib.ConsoleTest.csproj", "{E5AC5783-096E-49A4-B983-01F057B70370}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{61B3455C-E099-44E4-93E6-5178A7972704}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61B3455C-E099-44E4-93E6-5178A7972704}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61B3455C-E099-44E4-93E6-5178A7972704}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61B3455C-E099-44E4-93E6-5178A7972704}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5AC5783-096E-49A4-B983-01F057B70370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5AC5783-096E-49A4-B983-01F057B70370}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5AC5783-096E-49A4-B983-01F057B70370}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5AC5783-096E-49A4-B983-01F057B70370}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {27D8AC2B-FF45-4E9E-9496-875F88D2477D}
+	EndGlobalSection
+EndGlobal
