@@ -115,12 +115,8 @@ namespace TwitchApiLib
             string profileImageUrl = jaData[0].Value<string>("profile_image_url");
             string offlineImageUrl = jaData[0].Value<string>("offline_image_url");
             ulong viewCount = jaData[0].Value<ulong>("view_count");
-            string date = jaData[0].Value<string>("created_at");
-            if (!DateTime.TryParseExact(date, "MM/dd/yyyy HH:mm:ss", null,
-                System.Globalization.DateTimeStyles.None, out DateTime creationDate))
-            {
-                creationDate = DateTime.MaxValue;
-            }
+            string createdAt = jaData[0].Value<string>("created_at");
+            DateTime creationDate = ParseDateTime(createdAt);
 
             TwitchBroadcasterType broadcasterType = GetBroadcasterType(broadcasterTypeString);
             TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetChannelPlaybackAccessMode(userLogin, out _);
@@ -139,18 +135,10 @@ namespace TwitchApiLib
                 string userLogin = vodInfo.Value<string>("user_login");
                 string title = vodInfo.Value<string>("title");
                 string description = vodInfo.Value<string>("description");
-                string dateCreated = vodInfo.Value<string>("created_at");
-                if (!DateTime.TryParseExact(dateCreated, "MM/dd/yyyy HH:mm:ss",
-                    null, System.Globalization.DateTimeStyles.None, out DateTime creationDate))
-                {
-                    creationDate = DateTime.MaxValue;
-                }
-                string datePublished = vodInfo.Value<string>("published_at");
-                if (!DateTime.TryParseExact(datePublished, "MM/dd/yyyy HH:mm:ss",
-                    null, System.Globalization.DateTimeStyles.None, out DateTime publishedDate))
-                {
-                    publishedDate = DateTime.MaxValue;
-                }
+                string createdAt = vodInfo.Value<string>("created_at");
+                DateTime creationDate = ParseDateTime(createdAt);
+                string publishedAt = vodInfo.Value<string>("published_at");
+                DateTime publishedDate = ParseDateTime(publishedAt);
                 string url = vodInfo.Value<string>("url");
                 string thumbnailTemplateUrl = vodInfo.Value<string>("thumbnail_url");
                 string viewable = vodInfo.Value<string>("viewable");
@@ -537,6 +525,17 @@ namespace TwitchApiLib
         {
             string t = dateTime.ToString("yyyy.MM.dd HH:mm:ss");
             return dateTime.IsGmt() ? $"{t} GMT" : t;
+        }
+
+        internal static DateTime ParseDateTime(string dateTimeString, string format = "MM/dd/yyyy HH:mm:ss")
+        {
+            if (DateTime.TryParseExact(dateTimeString, format, null,
+                System.Globalization.DateTimeStyles.AssumeUniversal, out DateTime dateTime))
+            {
+                return dateTime.ToUniversalTime();
+            }
+
+            return DateTime.MaxValue;
         }
 
         public static int HttpGet_Helix(string url, out string response)
