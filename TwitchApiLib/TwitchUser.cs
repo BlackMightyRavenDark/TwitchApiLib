@@ -135,7 +135,6 @@ namespace TwitchApiLib
             int millisecondsTimeout, CancellationToken cancellationToken = default)
         {
             List<TwitchVodResult> resultList = new List<TwitchVodResult>();
-            if (maxVideos == 0U) { return resultList; }
 
             JArray jaRawVods = GetVideosRaw(maxVideos);
             if (jaRawVods.Count > 0)
