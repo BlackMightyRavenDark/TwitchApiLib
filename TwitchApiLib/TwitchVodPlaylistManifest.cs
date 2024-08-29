@@ -11,8 +11,8 @@ namespace TwitchApiLib
 
 		public int Count => _manifestItemList != null ? _manifestItemList.Count : 0;
 
-		public TwitchVodPlaylistManifestItem this[string formatId] { get { return FindManifestItemWithFormatId(formatId); } }
-		public TwitchVodPlaylistManifestItem this[int id] { get { return _manifestItemList[id]; } }
+		public TwitchVodPlaylistManifestItem this[string formatId] => FindManifestItemWithFormatId(formatId);
+		public TwitchVodPlaylistManifestItem this[int id] => _manifestItemList[id];
 
 		private List<TwitchVodPlaylistManifestItem> _manifestItemList;
 

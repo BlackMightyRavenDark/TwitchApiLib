@@ -13,7 +13,7 @@ namespace TwitchApiLib
 
 		private List<TwitchVodChunk> _chunks = new List<TwitchVodChunk>();
 
-		public string this[int id] { get { return StreamRoot + _chunks[id].FileName; } }
+		public string this[int id] => StreamRoot + _chunks[id].FileName;
 
 		public TwitchVodPlaylist(string playlistRaw, string playlistUrl)
 		{
