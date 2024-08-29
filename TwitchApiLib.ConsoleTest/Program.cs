@@ -40,7 +40,7 @@ namespace TwitchApiLib.ConsoleTest
 
 					Console.WriteLine("Retrieving channel videos...");
 
-					List<TwitchVodResult> vods = twitchUserResult.User.GetVideosMultiThreaded(100U);
+					List<TwitchVodResult> vods = twitchUserResult.User.GetVideosMultiThreaded(10U);
 
 					if (vods.Count > 0)
 					{
