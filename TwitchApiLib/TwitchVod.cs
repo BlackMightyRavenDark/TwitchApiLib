@@ -131,6 +131,13 @@ namespace TwitchApiLib
 			Utils.ExtractVodSpecialDataFromThumbnailUrl(ThumbnailUrl, out specialId, out serverId);
 		}
 
+		public string FormatThumbnailUrl(ushort imageWidth, ushort imageHeight)
+		{
+			return ThumbnailUrl?
+				.Replace("%{width}", imageWidth.ToString())
+				.Replace("%{height}", imageHeight.ToString());
+		}
+
 		public int RetrievePreviewImage(ushort width, ushort height)
 		{
 			if (PreviewImageData != null) { return 200; }
@@ -140,17 +147,20 @@ namespace TwitchApiLib
 				return 400;
 			}
 
-			string url = ThumbnailUrl
-				.Replace("%{width}", width.ToString())
-				.Replace("%{height}", height.ToString());
+			string url = FormatThumbnailUrl(width, height);
 
-			FileDownloader d = new FileDownloader() { Url = url };
-			PreviewImageData = new MemoryStream();
-			int errorCode = d.Download(PreviewImageData);
+			if (!string.IsNullOrEmpty(url) && !string.IsNullOrWhiteSpace(url))
+			{
+				FileDownloader d = new FileDownloader() { Url = url };
+				PreviewImageData = new MemoryStream();
+				int errorCode = d.Download(PreviewImageData);
 
-			if (errorCode != 200) { DisposePreviewImageData(); }
+				if (errorCode != 200) { DisposePreviewImageData(); }
 
-			return errorCode;
+				return errorCode;
+			}
+
+			return 400;
 		}
 
 		public void DisposePreviewImageData()
