@@ -18,7 +18,7 @@ namespace TwitchApiLib.ConsoleTest
                     return;
                 }
 
-                MultiThreadedDownloaderLib.MultiThreadedDownloader.SetMaximumConnectionsLimit(100);
+                MultiThreadedDownloaderLib.MultiThreadedDownloader.SetDefaultMaximumConnectionLimit(100);
 
                 Console.WriteLine("Retrieving user info...");
                 TwitchUserResult twitchUserResult = TwitchUser.Get(userName.ToLower());
