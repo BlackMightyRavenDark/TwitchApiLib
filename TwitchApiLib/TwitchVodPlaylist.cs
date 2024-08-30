@@ -8,17 +8,17 @@ namespace TwitchApiLib
 	{
 		public string PlaylistRaw { get; }
 		public string PlaylistUrl { get; }
-		public string StreamRoot { get; }
+		public string StreamRootUrl { get; }
 		public List<TwitchVodChunk> ChunkList { get; }
 		public int Count => ChunkList.Count;
 		public TwitchVodMutedSegments MutedSegments => GetMutedSegments();
-		public string this[int id] => StreamRoot + ChunkList[id].FileName;
+		public string this[int id] => StreamRootUrl + ChunkList[id].FileName;
 
 		public TwitchVodPlaylist(string playlistRaw, string playlistUrl)
 		{
 			PlaylistRaw = playlistRaw;
 			PlaylistUrl = playlistUrl;
-			StreamRoot = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
+			StreamRootUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
 			ChunkList = new List<TwitchVodChunk>();
 		}
 
