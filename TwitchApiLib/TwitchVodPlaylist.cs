@@ -84,7 +84,7 @@ namespace TwitchApiLib
 			{
 				TwitchVodMutedSegments mutedSegments =
 					TwitchVodMutedSegments.ParseMutedSegments(ChunkList);
-				mutedSegments.BuildSegmentList();
+				mutedSegments.Parse();
 				mutedSegments.CalculateTotalDuration();
 				return mutedSegments;
 			}

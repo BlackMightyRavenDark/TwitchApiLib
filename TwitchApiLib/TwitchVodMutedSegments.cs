@@ -9,12 +9,14 @@ namespace TwitchApiLib
 	{
 		public List<string> SegmentListFormatted { get; }
 		public TimeSpan TotalDuration { get; private set; }
+		public List<TwitchVodChunk> Chunks { get; }
 		public List<List<TwitchVodChunk>> Segments { get; }
 
 		public TwitchVodMutedSegments()
 		{
 			SegmentListFormatted = new List<string>();
 			TotalDuration = TimeSpan.Zero;
+			Chunks = new List<TwitchVodChunk>();
 			Segments = new List<List<TwitchVodChunk>>();
 		}
 
@@ -31,13 +33,19 @@ namespace TwitchApiLib
 			}
 		}
 
-		public void BuildSegmentList()
+		public void Parse()
 		{
 			SegmentListFormatted.Clear();
+			Chunks.Clear();
 			foreach (List<TwitchVodChunk> list in Segments)
 			{
 				string t = SegmentToString(list);
 				SegmentListFormatted.Add(t);
+
+				foreach (TwitchVodChunk chunk in list)
+				{
+					Chunks.Add(chunk);
+				}
 			}
 		}
 
@@ -64,6 +72,7 @@ namespace TwitchApiLib
 
 					TwitchVodChunk chunk = new TwitchVodChunk(
 						chunkList[i].FileName, chunkList[i].Offset, chunkList[i].Duration);
+					result.Chunks.Add(chunk);
 					segmentList.Add(chunk);
 				}
 				else if (segmentList != null)
@@ -84,6 +93,7 @@ namespace TwitchApiLib
 		public void Clear()
 		{
 			Segments.Clear();
+			Chunks.Clear();
 			SegmentListFormatted.Clear();
 			TotalDuration = TimeSpan.Zero;
 		}
