@@ -138,6 +138,24 @@ namespace TwitchApiLib
 				.Replace("%{height}", imageHeight.ToString());
 		}
 
+		public TwitchVodMutedSegments GetMutedSegments()
+		{
+			TwitchVodPlaylist playlist = GetPlaylist();
+			if (playlist != null)
+			{
+				if (playlist.Parse() > 0)
+				{
+					TwitchVodMutedSegments mutedSegments =
+						TwitchVodMutedSegments.ParseMutedSegments(playlist.ChunkList);
+					mutedSegments.BuildSegmentList();
+					mutedSegments.CalculateTotalDuration();
+					return mutedSegments;
+				}
+			}
+
+			return null;
+		}
+
 		public int RetrievePreviewImage(ushort width, ushort height)
 		{
 			if (PreviewImageData != null) { return 200; }

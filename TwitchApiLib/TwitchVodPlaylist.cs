@@ -9,27 +9,26 @@ namespace TwitchApiLib
 		public string PlaylistRaw { get; }
 		public string PlaylistUrl { get; }
 		public string StreamRoot { get; }
-		public int Count => _chunks.Count;
-
-		private List<TwitchVodChunk> _chunks = new List<TwitchVodChunk>();
-
-		public string this[int id] => StreamRoot + _chunks[id].FileName;
+		public List<TwitchVodChunk> ChunkList { get; }
+		public int Count => ChunkList.Count;
+		public string this[int id] => StreamRoot + ChunkList[id].FileName;
 
 		public TwitchVodPlaylist(string playlistRaw, string playlistUrl)
 		{
 			PlaylistRaw = playlistRaw;
 			PlaylistUrl = playlistUrl;
 			StreamRoot = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
+			ChunkList = new List<TwitchVodChunk>();
 		}
 
 		public TwitchVodChunk GetChunk(int id)
 		{
-			return _chunks[id];
+			return ChunkList[id];
 		}
 
 		public int Parse()
 		{
-			_chunks.Clear();
+			ChunkList.Clear();
 
 			if (string.IsNullOrEmpty(PlaylistRaw) || string.IsNullOrWhiteSpace(PlaylistUrl))
 			{
@@ -52,13 +51,13 @@ namespace TwitchApiLib
 						numberFormatInfo, out double d) ? d : 0.0;
 
 					TwitchVodChunk chunk = new TwitchVodChunk(strings[stringId + 1], offset, chunkLength);
-					_chunks.Add(chunk);
+					ChunkList.Add(chunk);
 
 					offset += chunkLength;
 				}
 			}
 
-			return _chunks.Count;
+			return ChunkList.Count;
 		}
 
 		private int FindFirstChunkStringId(string[] strings)
@@ -76,7 +75,7 @@ namespace TwitchApiLib
 			string t = string.Empty;
 			if (Count > 0)
 			{
-				for (int i = 0; i < _chunks.Count; ++i) { t += this[i] + Environment.NewLine; }
+				for (int i = 0; i < ChunkList.Count; ++i) { t += this[i] + Environment.NewLine; }
 			}
 			return t;
 		}
