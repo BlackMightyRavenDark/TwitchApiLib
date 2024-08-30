@@ -14,6 +14,8 @@ namespace TwitchApiLib
 		public TwitchVodMutedSegments MutedSegments => GetMutedSegments();
 		public string this[int id] => StreamRootUrl + ChunkList[id].FileName;
 
+		private bool _isParsed = false;
+
 		public TwitchVodPlaylist(string playlistRaw, string playlistUrl)
 		{
 			PlaylistRaw = playlistRaw;
@@ -27,34 +29,39 @@ namespace TwitchApiLib
 			return ChunkList[id];
 		}
 
-		public int Parse()
+		public int Parse(bool anyway = false)
 		{
-			ChunkList.Clear();
-
-			if (string.IsNullOrEmpty(PlaylistRaw) || string.IsNullOrWhiteSpace(PlaylistRaw))
+			if (anyway || !_isParsed)
 			{
-				return 0;
-			}
+				_isParsed = true;
 
-			string[] strings = PlaylistRaw.Split('\n');
-			int stringId = FindFirstChunkStringId(strings);
-			if (stringId >= 0)
-			{
-				double offset = 0.0;
-				for (; stringId < strings.Length; stringId += 2)
+				ChunkList.Clear();
+
+				if (string.IsNullOrEmpty(PlaylistRaw) || string.IsNullOrWhiteSpace(PlaylistRaw))
 				{
-					string[] splitted = strings[stringId].Split(':');
-					if (splitted[0] != "#EXTINF") { continue; }
-					string[] lengthSplitted = splitted[1].Split(',');
+					return 0;
+				}
 
-					NumberFormatInfo numberFormatInfo = new NumberFormatInfo() { NumberDecimalSeparator = "." };
-					double chunkLength = double.TryParse(lengthSplitted[0], NumberStyles.Any,
-						numberFormatInfo, out double d) ? d : 0.0;
+				string[] strings = PlaylistRaw.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
+				int stringId = FindFirstChunkStringId(strings);
+				if (stringId >= 0)
+				{
+					double offset = 0.0;
+					for (; stringId < strings.Length; stringId += 2)
+					{
+						string[] splitted = strings[stringId].Split(':');
+						if (splitted[0] != "#EXTINF") { continue; }
+						string[] lengthSplitted = splitted[1].Split(',');
 
-					TwitchVodChunk chunk = new TwitchVodChunk(strings[stringId + 1], offset, chunkLength);
-					ChunkList.Add(chunk);
+						NumberFormatInfo numberFormatInfo = new NumberFormatInfo() { NumberDecimalSeparator = "." };
+						double chunkLength = double.TryParse(lengthSplitted[0], NumberStyles.Any,
+							numberFormatInfo, out double d) ? d : 0.0;
 
-					offset += chunkLength;
+						TwitchVodChunk chunk = new TwitchVodChunk(strings[stringId + 1], offset, chunkLength);
+						ChunkList.Add(chunk);
+
+						offset += chunkLength;
+					}
 				}
 			}
 
