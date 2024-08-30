@@ -183,7 +183,7 @@ namespace TwitchApiLib
 				TwitchVod vod = new TwitchVod(vodId, title, description, duration, game, creationDate,
 					publishedDate, deletionDeletion, url, thumbnailTemplateUrl, viewable, viewCount,
 					language, vodType, playbackAccessMode, streamId, twitchUserResult.User,
-					playlistUrl, vodInfo.ToString(), videoMetadataResult.Metadata);
+					playlistUrl, null, vodInfo.ToString(), videoMetadataResult.Metadata);
 				return new TwitchVodResult(vod, 200, null, vodInfo.ToString());
 			}
 			catch (Exception ex)

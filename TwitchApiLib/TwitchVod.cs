@@ -27,6 +27,7 @@ namespace TwitchApiLib
 		public TwitchUser User { get; }
 		public Stream PreviewImageData { get; private set; }
 		public string PlaylistUrl { get; }
+		public TwitchVodPlaylist Playlist { get; private set; }
 		public string RawData { get; }
 		public TwitchVideoMetadata RawMetadata { get; }
 		public bool IsHighlight => VodType == TwitchVodType.Highlight;
@@ -38,7 +39,7 @@ namespace TwitchApiLib
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
 			string url, string thumbnailUrl, string viewable, ulong viewCount,
 			string language, TwitchVodType vodType, TwitchPlaybackAccessMode playbackAccessMode,
-			ulong streamId, TwitchUser user, string playlistUrl,
+			ulong streamId, TwitchUser user, string playlistUrl, TwitchVodPlaylist playlist,
 			string rawData, TwitchVideoMetadata rawMetadata)
 		{
 			Id = id;
@@ -60,6 +61,7 @@ namespace TwitchApiLib
 			StreamId = streamId;
 			User = user;
 			PlaylistUrl = playlistUrl;
+			Playlist = playlist;
 			RawData = rawData;
 			RawMetadata = rawMetadata;
 			IsPlaylistUrlExists = !string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl);
@@ -124,6 +126,34 @@ namespace TwitchApiLib
 		{
 			int errorCode = GetPlaylist(out TwitchVodPlaylist playlist, formatId);
 			return errorCode == 200 ? playlist : null;
+		}
+
+		public bool UpdatePlaylist(string formatId, bool clearCurrentPlaylist = false)
+		{
+			if (clearCurrentPlaylist)
+			{
+				Playlist = GetPlaylist(formatId);
+				return Playlist != null;
+			}
+
+			TwitchVodPlaylist playlist = GetPlaylist(formatId);
+			if (playlist != null)
+			{
+				Playlist = playlist;
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool UpdatePlaylist(bool clearCurrentPlaylist)
+		{
+			return UpdatePlaylist("chunked", clearCurrentPlaylist);
+		}
+
+		public bool UpdatePlaylist()
+		{
+			return UpdatePlaylist(false);
 		}
 
 		public void GetSpecialData(out string specialId, out string serverId)
