@@ -181,14 +181,7 @@ namespace TwitchApiLib
 
 		public TwitchVodMutedSegments GetMutedSegments()
 		{
-			if (UpdatePlaylist() && Playlist.Parse() > 0)
-			{
-				TwitchVodMutedSegments mutedSegments =
-					TwitchVodMutedSegments.ParseMutedSegments(Playlist.ChunkList);
-				mutedSegments.BuildSegmentList();
-				mutedSegments.CalculateTotalDuration();
-				return mutedSegments;
-			}
+			if (UpdatePlaylist()) { return Playlist.MutedSegments; }
 
 			return null;
 		}

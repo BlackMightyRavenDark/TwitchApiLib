@@ -11,6 +11,7 @@ namespace TwitchApiLib
 		public string StreamRoot { get; }
 		public List<TwitchVodChunk> ChunkList { get; }
 		public int Count => ChunkList.Count;
+		public TwitchVodMutedSegments MutedSegments => GetMutedSegments();
 		public string this[int id] => StreamRoot + ChunkList[id].FileName;
 
 		public TwitchVodPlaylist(string playlistRaw, string playlistUrl)
@@ -68,6 +69,20 @@ namespace TwitchApiLib
 			}
 
 			return -1;
+		}
+
+		private TwitchVodMutedSegments GetMutedSegments()
+		{
+			if (Parse() > 0)
+			{
+				TwitchVodMutedSegments mutedSegments =
+					TwitchVodMutedSegments.ParseMutedSegments(ChunkList);
+				mutedSegments.BuildSegmentList();
+				mutedSegments.CalculateTotalDuration();
+				return mutedSegments;
+			}
+
+			return null;
 		}
 
 		public override string ToString()
