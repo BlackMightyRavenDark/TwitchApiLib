@@ -31,7 +31,7 @@ namespace TwitchApiLib
 		{
 			ChunkList.Clear();
 
-			if (string.IsNullOrEmpty(PlaylistRaw) || string.IsNullOrWhiteSpace(PlaylistUrl))
+			if (string.IsNullOrEmpty(PlaylistRaw) || string.IsNullOrWhiteSpace(PlaylistRaw))
 			{
 				return 0;
 			}
