@@ -128,6 +128,17 @@ namespace TwitchApiLib
 			return errorCode == 200 ? playlist : null;
 		}
 
+		public bool ClearPlaylist()
+		{
+			if (Playlist != null)
+			{
+				Playlist.ChunkList.Clear();
+				return true;
+			}
+
+			return false;
+		}
+
 		public bool UpdatePlaylist(string formatId, bool clearCurrentPlaylist = false)
 		{
 			if (clearCurrentPlaylist)
