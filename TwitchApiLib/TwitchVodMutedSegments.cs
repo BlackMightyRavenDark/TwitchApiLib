@@ -52,12 +52,17 @@ namespace TwitchApiLib
 
 		private string SegmentToString(List<TwitchVodChunk> segment, bool showChunkCount = false)
 		{
-			double segmentDuration = segment.Sum(item => item.Duration);
-			TimeSpan start = TimeSpan.FromSeconds(segment[0].Offset);
-			TimeSpan end = TimeSpan.FromSeconds(segment[0].Offset + segmentDuration);
-			string t = $"{start:hh':'mm':'ss} - {end:hh':'mm':'ss}";
-			if (showChunkCount) { t += $" ({segment.Count} chunks)"; }
-			return t;
+			if (segment != null && segment.Count > 0)
+			{
+				double segmentDuration = segment.Sum(item => item.Duration);
+				TimeSpan start = TimeSpan.FromSeconds(segment[0].Offset);
+				TimeSpan end = TimeSpan.FromSeconds(segment[0].Offset + segmentDuration);
+				string t = $"{start:hh':'mm':'ss} - {end:hh':'mm':'ss}";
+				if (showChunkCount) { t += $" ({segment.Count} chunks)"; }
+				return t;
+			}
+
+			return "<empty segment>";
 		}
 
 		public static TwitchVodMutedSegments ParseMutedSegments(List<TwitchVodChunk> chunkList)
