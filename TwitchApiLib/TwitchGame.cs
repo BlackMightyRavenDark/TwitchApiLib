@@ -14,7 +14,7 @@ namespace TwitchApiLib
 		public Stream PreviewImageData { get; private set; }
 		public string RawData { get; }
 
-		public const string GAME_PREVIEW_TEMPLATE_URL = "https://static-cdn.jtvnw.net/ttv-boxart/<id>-<width>x<height>.jpg";
+		public const string GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>-<width>x<height>.jpg";
 		public const string UNKNOWN_GAME_BOXART_URL = "https://static-cdn.jtvnw.net/ttv-boxart/404_boxart.png";
 
 		public TwitchGame(string title, string displayName, ulong id,
@@ -35,6 +35,21 @@ namespace TwitchApiLib
 		public static TwitchGame CreateUnknownGame()
 		{
 			return new TwitchGame(null, null, 0UL, UNKNOWN_GAME_BOXART_URL, null);
+		}
+
+		public int RetrievePreviewImage(string imageUrl)
+		{
+			if (PreviewImageData != null) { return 200; }
+
+			FileDownloader d = new FileDownloader() { Url = imageUrl };
+			PreviewImageData = new MemoryStream();
+			int errorCode = d.Download(PreviewImageData);
+
+			if (errorCode != 200) { DisposePreviewImageData(); }
+
+			d.Dispose();
+
+			return errorCode;
 		}
 
 		public int RetrievePreviewImage(ushort width, ushort height)
@@ -60,15 +75,7 @@ namespace TwitchApiLib
 					.Replace("{height}", height.ToString());
 			}
 
-			FileDownloader d = new FileDownloader() { Url = url };
-			PreviewImageData = new MemoryStream();
-			int errorCode = d.Download(PreviewImageData);
-
-			if (errorCode != 200) { DisposePreviewImageData(); }
-
-			d.Dispose();
-
-			return errorCode;
+			return RetrievePreviewImage(url);
 		}
 
 		public void DisposePreviewImageData()
@@ -82,7 +89,7 @@ namespace TwitchApiLib
 
 		public static string FormatPreviewTemplateUrl(ulong id, ushort width, ushort height)
 		{
-			return GAME_PREVIEW_TEMPLATE_URL.Replace("<id>", id.ToString())
+			return GAME_PREVIEW_IMAGE_URL_TEMPLATE.Replace("<id>", id.ToString())
 				.Replace("<width>", width.ToString())
 				.Replace("<height>", height.ToString());
 		}
