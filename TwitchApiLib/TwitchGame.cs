@@ -44,18 +44,29 @@ namespace TwitchApiLib
 			string url = BoxArtUrl;
 			if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
 			{
-				return 400;
+				if (IsKnown)
+				{
+					url = FormatPreviewTemplateUrl(Id, width, height);
+				}
+				else
+				{
+					return 404;
+				}
 			}
-
-			url = url
-				.Replace("{width}", width.ToString())
-				.Replace("{height}", height.ToString());
+			else
+			{
+				url = url
+					.Replace("{width}", width.ToString())
+					.Replace("{height}", height.ToString());
+			}
 
 			FileDownloader d = new FileDownloader() { Url = url };
 			PreviewImageData = new MemoryStream();
 			int errorCode = d.Download(PreviewImageData);
 
 			if (errorCode != 200) { DisposePreviewImageData(); }
+
+			d.Dispose();
 
 			return errorCode;
 		}
