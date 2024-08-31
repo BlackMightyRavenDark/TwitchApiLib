@@ -64,7 +64,7 @@ namespace TwitchApiLib
 			{
 				if (IsKnown)
 				{
-					url = FormatPreviewTemplateUrl(Id, width, height);
+					url = FormatPreviewImageTemplateUrl(Id, width, height);
 				}
 				else
 				{
@@ -90,7 +90,7 @@ namespace TwitchApiLib
 			}
 		}
 
-		public static string FormatPreviewTemplateUrl(ulong id, ushort width, ushort height)
+		public static string FormatPreviewImageTemplateUrl(ulong id, ushort width, ushort height)
 		{
 			return GAME_PREVIEW_IMAGE_URL_TEMPLATE.Replace("<id>", id.ToString())
 				.Replace("<width>", width.ToString())

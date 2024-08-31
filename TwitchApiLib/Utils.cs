@@ -212,7 +212,7 @@ namespace TwitchApiLib
 					id = 0UL;
 				}
 
-				string boxArlUrl = id > 0UL ? TwitchGame.FormatPreviewTemplateUrl(id, 0, 0) : null;
+				string boxArlUrl = id > 0UL ? TwitchGame.FormatPreviewImageTemplateUrl(id, 0, 0) : null;
 
 				return new TwitchGame(title, title, id, boxArlUrl, rawGameInfo);
 			}
