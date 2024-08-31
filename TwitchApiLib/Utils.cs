@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 using static TwitchApiLib.TwitchApi;
+using System.Collections.Generic;
 
 namespace TwitchApiLib
 {
@@ -514,6 +515,24 @@ namespace TwitchApiLib
 		public static int GetVodPlaylistUrl(TwitchVod vod, out string playlistUrl)
 		{
 			return GetVodPlaylistUrl(vod, "chunked", out playlistUrl);
+		}
+
+		internal static Dictionary<string, string> SplitStringToKeyValues(
+			string inputString, string keySeparator, char valueSeparator)
+		{
+			if (string.IsNullOrEmpty(inputString) || string.IsNullOrWhiteSpace(inputString))
+			{
+				return null;
+			}
+			string[] keyValues = inputString.Split(new string[] { keySeparator }, StringSplitOptions.None);
+			Dictionary<string, string> dict = new Dictionary<string, string>();
+			for (int i = 0; i < keyValues.Length; ++i)
+			{
+				string[] t = keyValues[i].Split(valueSeparator);
+				string value = t.Length > 1 ? t[1] : string.Empty;
+				dict[t[0]] = value;
+			}
+			return dict;
 		}
 
 		public static bool IsGmt(this DateTime dateTime)

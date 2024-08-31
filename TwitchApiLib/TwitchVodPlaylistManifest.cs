@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -8,36 +9,41 @@ namespace TwitchApiLib
 	public class TwitchVodPlaylistManifest
 	{
 		public string ManifestRaw { get; }
-
-		public int Count => _manifestItemList != null ? _manifestItemList.Count : 0;
-
+		public List<TwitchVodPlaylistManifestItem> Items { get; }
+		public int Count => Items != null ? Items.Count : 0;
 		public TwitchVodPlaylistManifestItem this[string formatId] => FindManifestItemWithFormatId(formatId);
-		public TwitchVodPlaylistManifestItem this[int id] => _manifestItemList[id];
-
-		private List<TwitchVodPlaylistManifestItem> _manifestItemList;
+		public TwitchVodPlaylistManifestItem this[int id] => Items[id];
 
 		public TwitchVodPlaylistManifest(string manifestRaw)
 		{
 			ManifestRaw = manifestRaw;
-			_manifestItemList = Parse();
+			Items = new List<TwitchVodPlaylistManifestItem>();
+			Parse();
 		}
 
-		private List<TwitchVodPlaylistManifestItem> Parse()
+		private void Parse()
 		{
+			Items.Clear();
+
 			if (string.IsNullOrEmpty(ManifestRaw) || string.IsNullOrWhiteSpace(ManifestRaw))
 			{
-				return null;
+				return;
 			}
 
 			List<string> fixedList = GetFixedList();
-			if (fixedList.Count < 2) { return null; }
+			if (fixedList.Count < 2) { return; }
 
-			_manifestItemList = new List<TwitchVodPlaylistManifestItem>();
 			int max = fixedList.Count - 1;
 			for (int i = 0; i < max; i += 2)
 			{
 				string str = fixedList[i].Substring(fixedList[i].IndexOf(':') + 1);
-				Dictionary<string, string> dict = SplitStringToKeyValues(str, ",", '=');
+				Dictionary<string, string> dict = Utils.SplitStringToKeyValues(str, ",", '=');
+				if (dict == null)
+				{
+					System.Diagnostics.Debug.WriteLine("Dictionary error in 'TwitchVodPlaylistManifest.Parse()'");
+					continue;
+				}
+
 				int bandwidth = dict.ContainsKey("BANDWIDTH") ? int.Parse(dict["BANDWIDTH"]) : 0;
 				int videoWidth = 0;
 				int videoHeight = 0;
@@ -77,17 +83,15 @@ namespace TwitchApiLib
 
 				TwitchVodPlaylistManifestItem manifestItem = new TwitchVodPlaylistManifestItem(
 					videoWidth, videoHeight, bandwidth, frameRate, codecs, formatId, url);
-				_manifestItemList.Add(manifestItem);
+				Items.Add(manifestItem);
 			}
-
-			return _manifestItemList;
 		}
 
 		public void SortByBandwidth()
 		{
 			if (Count > 1)
 			{
-				_manifestItemList.Sort((x, y) =>
+				Items.Sort((x, y) =>
 				{
 					if (x.Bandwidth == 0 || y.Bandwidth == 0)
 					{
@@ -105,7 +109,7 @@ namespace TwitchApiLib
 		{
 			if (Count > 1)
 			{
-				_manifestItemList.Sort((x, y) =>
+				Items.Sort((x, y) =>
 				{
 					if (x.ResolutionHeight == y.ResolutionHeight)
 					{
@@ -134,7 +138,7 @@ namespace TwitchApiLib
 			}
 
 			List<string> resultList = new List<string>();
-			string[] strings = manifest.Split('\n');
+			string[] strings = manifest.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
 			foreach (string str in strings)
 			{
 				if (str.StartsWith("#EXT-X-STREAM-INF:") || str.StartsWith("http"))
@@ -147,14 +151,7 @@ namespace TwitchApiLib
 
 		private TwitchVodPlaylistManifestItem FindManifestItemWithFormatId(string formatId)
 		{
-			foreach (TwitchVodPlaylistManifestItem item in _manifestItemList)
-			{
-				if (item.FormatId == formatId)
-				{
-					return item;
-				}
-			}
-			return null;
+			return Items?.FirstOrDefault(item => item.FormatId == formatId);
 		}
 
 		private static string RemoveQuotes(string str)
@@ -164,24 +161,6 @@ namespace TwitchApiLib
 			if (s[0] == '\"' && s.Length > 1) { s = s.Substring(1); }
 			if (s.Length > 0 && s[s.Length - 1] == '"') { s = s.Substring(0, s.Length - 1); }
 			return s;
-		}
-
-		private static Dictionary<string, string> SplitStringToKeyValues(
-			string inputString, string keySeparator, char valueSeparator)
-		{
-			if (string.IsNullOrEmpty(inputString) || string.IsNullOrWhiteSpace(inputString))
-			{
-				return null;
-			}
-			string[] keyValues = inputString.Split(new string[] { keySeparator }, StringSplitOptions.None);
-			Dictionary<string, string> dict = new Dictionary<string, string>();
-			for (int i = 0; i < keyValues.Length; ++i)
-			{
-				string[] t = keyValues[i].Split(valueSeparator);
-				string value = t.Length > 1 ? t[1] : string.Empty;
-				dict[t[0]] = value;
-			}
-			return dict;
 		}
 
 		public override string ToString()
