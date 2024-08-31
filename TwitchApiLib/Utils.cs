@@ -408,7 +408,7 @@ namespace TwitchApiLib
 
 		public static int GetVodPlaylistManifest(ulong vodId, bool isSubscribersOnly, out TwitchVodPlaylistManifest playlistManifest)
 		{
-			return GetVodPlaylistManifest(vodId, isSubscribersOnly, out playlistManifest);
+			return GetVodPlaylistManifest(vodId.ToString(), isSubscribersOnly, out playlistManifest);
 		}
 
 		public static int GetVodPlaylistManifest(TwitchVod vod, out TwitchVodPlaylistManifest playlistManifest)
