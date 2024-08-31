@@ -87,6 +87,16 @@ namespace TwitchApiLib
 			}
 		}
 
+		public IEnumerable<TwitchVodPlaylistManifestItem> GetVideos()
+		{
+			return Items.Where(item => !item.IsAudioOnly());
+		}
+
+		public IEnumerable<TwitchVodPlaylistManifestItem> GetAudios()
+		{
+			return Items.Where(item => item.IsAudioOnly());
+		}
+
 		public void SortByBandwidth()
 		{
 			if (Count > 1)
