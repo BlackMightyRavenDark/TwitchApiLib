@@ -10,6 +10,7 @@ namespace TwitchApiLib
 		public string DisplayName { get; }
 		public ulong Id { get; }
 		public string BoxArtUrl { get; }
+		public string ActualPreviewImageUrl { get; private set; }
 		public bool IsKnown => Id > 0UL;
 		public Stream PreviewImageData { get; private set; }
 		public string RawData { get; }
@@ -24,6 +25,7 @@ namespace TwitchApiLib
 			DisplayName = displayName;
 			Id = id;
 			BoxArtUrl = boxArtUrl;
+			ActualPreviewImageUrl = boxArtUrl;
 			RawData = rawData;
 		}
 
@@ -41,6 +43,7 @@ namespace TwitchApiLib
 		{
 			if (PreviewImageData != null) { return 200; }
 
+			ActualPreviewImageUrl = imageUrl;
 			FileDownloader d = new FileDownloader() { Url = imageUrl };
 			PreviewImageData = new MemoryStream();
 			int errorCode = d.Download(PreviewImageData);
