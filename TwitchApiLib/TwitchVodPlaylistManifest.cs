@@ -112,6 +112,13 @@ namespace TwitchApiLib
 
 					return x.Bandwidth > y.Bandwidth ? -1 : 1;
 				});
+
+				TwitchVodPlaylistManifestItem[] videoItems = GetVideos().ToArray();
+				TwitchVodPlaylistManifestItem[] audioItems = GetAudios().ToArray();
+
+				Items.Clear();
+				Items.AddRange(videoItems);
+				Items.AddRange(audioItems);
 			}
 		}
 
