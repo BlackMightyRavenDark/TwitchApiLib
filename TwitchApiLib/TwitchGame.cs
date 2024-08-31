@@ -90,9 +90,9 @@ namespace TwitchApiLib
 			}
 		}
 
-		public static string FormatPreviewImageTemplateUrl(ulong id, ushort width, ushort height)
+		public static string FormatPreviewImageTemplateUrl(ulong gameId, ushort width, ushort height)
 		{
-			return GAME_PREVIEW_IMAGE_URL_TEMPLATE.Replace("<id>", id.ToString())
+			return GAME_PREVIEW_IMAGE_URL_TEMPLATE.Replace("<id>", gameId.ToString())
 				.Replace("<width>", width.ToString())
 				.Replace("<height>", height.ToString());
 		}
