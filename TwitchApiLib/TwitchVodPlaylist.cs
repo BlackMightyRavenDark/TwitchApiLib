@@ -78,13 +78,13 @@ namespace TwitchApiLib
 			return -1;
 		}
 
-		private TwitchVodMutedSegments GetMutedSegments()
+		public TwitchVodMutedSegments GetMutedSegments(bool showChunkCount = false)
 		{
 			if (Parse() > 0)
 			{
 				TwitchVodMutedSegments mutedSegments =
 					TwitchVodMutedSegments.ParseMutedSegments(ChunkList);
-				mutedSegments.Parse();
+				mutedSegments.Parse(showChunkCount);
 				mutedSegments.CalculateTotalDuration();
 				return mutedSegments;
 			}

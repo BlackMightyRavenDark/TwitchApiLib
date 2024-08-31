@@ -34,13 +34,13 @@ namespace TwitchApiLib
 			}
 		}
 
-		public void Parse()
+		public void Parse(bool showChunkCount = false)
 		{
 			SegmentListFormatted.Clear();
 			Chunks.Clear();
 			foreach (List<TwitchVodChunk> list in Segments)
 			{
-				string t = SegmentToString(list);
+				string t = SegmentToString(list, showChunkCount);
 				SegmentListFormatted.Add(t);
 
 				foreach (TwitchVodChunk chunk in list)
@@ -50,12 +50,14 @@ namespace TwitchApiLib
 			}
 		}
 
-		private string SegmentToString(List<TwitchVodChunk> segment)
+		private string SegmentToString(List<TwitchVodChunk> segment, bool showChunkCount = false)
 		{
 			double segmentDuration = segment.Sum(item => item.Duration);
 			TimeSpan start = TimeSpan.FromSeconds(segment[0].Offset);
 			TimeSpan end = TimeSpan.FromSeconds(segment[0].Offset + segmentDuration);
-			return $"{start:hh':'mm':'ss} - {end:hh':'mm':'ss}";
+			string t = $"{start:hh':'mm':'ss} - {end:hh':'mm':'ss}";
+			if (showChunkCount) { t += $" ({segment.Count} chunks)"; }
+			return t;
 		}
 
 		public static TwitchVodMutedSegments ParseMutedSegments(List<TwitchVodChunk> chunkList)

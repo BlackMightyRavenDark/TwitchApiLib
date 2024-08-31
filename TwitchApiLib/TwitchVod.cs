@@ -179,9 +179,9 @@ namespace TwitchApiLib
 				.Replace("%{height}", imageHeight.ToString());
 		}
 
-		public TwitchVodMutedSegments GetMutedSegments()
+		public TwitchVodMutedSegments GetMutedSegments(bool showChunkCount = false)
 		{
-			if (UpdatePlaylist()) { return Playlist.MutedSegments; }
+			if (UpdatePlaylist()) { return Playlist.GetMutedSegments(showChunkCount); }
 
 			return null;
 		}
