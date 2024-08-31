@@ -28,7 +28,8 @@ namespace TwitchApiLib
 			{
 				foreach (TwitchVodChunk chunk in list)
 				{
-					TotalDuration = TotalDuration.Add(TimeSpan.FromSeconds(chunk.Duration));
+					TimeSpan chunkDurationTimeSpan = TimeSpan.FromSeconds(chunk.Duration);
+					TotalDuration = TotalDuration.Add(chunkDurationTimeSpan);
 				}
 			}
 		}
