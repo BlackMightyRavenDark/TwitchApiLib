@@ -87,12 +87,12 @@ namespace TwitchApiLib
 			}
 		}
 
-		public IEnumerable<TwitchVodPlaylistManifestItem> GetVideos()
+		public IEnumerable<TwitchVodPlaylistManifestItem> GetVideoItems()
 		{
 			return Items.Where(item => !item.IsAudioOnly());
 		}
 
-		public IEnumerable<TwitchVodPlaylistManifestItem> GetAudios()
+		public IEnumerable<TwitchVodPlaylistManifestItem> GetAudioItems()
 		{
 			return Items.Where(item => item.IsAudioOnly());
 		}
@@ -113,8 +113,8 @@ namespace TwitchApiLib
 					return x.Bandwidth > y.Bandwidth ? -1 : 1;
 				});
 
-				TwitchVodPlaylistManifestItem[] videoItems = GetVideos().ToArray();
-				TwitchVodPlaylistManifestItem[] audioItems = GetAudios().ToArray();
+				TwitchVodPlaylistManifestItem[] videoItems = GetVideoItems().ToArray();
+				TwitchVodPlaylistManifestItem[] audioItems = GetAudioItems().ToArray();
 
 				Items.Clear();
 				Items.AddRange(videoItems);
