@@ -31,6 +31,8 @@ namespace TwitchApiLib
 			int n = FileName.IndexOf(
 				GetState() == TwitchVodChunkState.NotMuted ? ".ts" : "-",
 				StringComparison.OrdinalIgnoreCase);
+			if (n < 0) { return null; }
+
 			return FileName.Substring(0, n);
 		}
 
