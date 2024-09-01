@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 using static TwitchApiLib.TwitchApi;
-using System.Collections.Generic;
 
 namespace TwitchApiLib
 {
