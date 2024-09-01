@@ -93,14 +93,9 @@ namespace TwitchApiLib
 			return Utils.GetVodPlaylistManifestUrl(this, out manifestUrl);
 		}
 
-		public int GetPlaylistManifest(out TwitchVodPlaylistManifest manifest)
+		public TwitchVodPlaylistManifestResult GetPlaylistManifest()
 		{
-			return Utils.GetVodPlaylistManifest(this, out manifest);
-		}
-
-		public TwitchVodPlaylistManifest GetPlaylistManifest()
-		{
-			return Utils.GetVodPlaylistManifest(this, out TwitchVodPlaylistManifest manifest) == 200 ? manifest : null;
+			return Utils.GetVodPlaylistManifest(this);
 		}
 
 		public int GetPlaylist(out TwitchVodPlaylist playlist, string formatId = "chunked")
