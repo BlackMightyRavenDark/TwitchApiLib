@@ -1,4 +1,5 @@
 ﻿using System;
+using MultiThreadedDownloaderLib;
 
 namespace TwitchApiLib
 {
@@ -27,6 +28,22 @@ namespace TwitchApiLib
 		public bool IsAudioOnly()
 		{
 			return !string.IsNullOrEmpty(FormatId) && FormatId.Contains("audio_only");
+		}
+
+		public TwitchVodPlaylistResult GetPlaylist()
+		{
+			if (!string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl))
+			{
+				FileDownloader d = new FileDownloader() { Url = PlaylistUrl };
+				int errorCode = d.DownloadString(out string response);
+				TwitchVodPlaylistResult playlistResult = errorCode == 200 ?
+					new TwitchVodPlaylistResult(new TwitchVodPlaylist(response, PlaylistUrl), 200) :
+					new TwitchVodPlaylistResult(null, errorCode);
+				d.Dispose();
+				return playlistResult;
+			}
+
+			return new TwitchVodPlaylistResult(null, 400);
 		}
 
 		public override string ToString()
