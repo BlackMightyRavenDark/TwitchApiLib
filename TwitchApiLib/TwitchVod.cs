@@ -98,7 +98,7 @@ namespace TwitchApiLib
 			return Utils.GetVodPlaylistManifest(this);
 		}
 
-		public int GetPlaylist(out TwitchVodPlaylist playlist, string formatId = "chunked")
+		public TwitchVodPlaylistResult GetPlaylist(string formatId = "chunked")
 		{
 			int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
 			if (errorCode == 200)
@@ -108,19 +108,12 @@ namespace TwitchApiLib
 				d.Dispose();
 				if (errorCode == 200)
 				{
-					playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl);
-					return 200;
+					TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl);
+					return new TwitchVodPlaylistResult(playlist, 200);
 				}
 			}
 
-			playlist = null;
-			return errorCode;
-		}
-
-		public TwitchVodPlaylist GetPlaylist(string formatId = "chunked")
-		{
-			int errorCode = GetPlaylist(out TwitchVodPlaylist playlist, formatId);
-			return errorCode == 200 ? playlist : null;
+			return new TwitchVodPlaylistResult(null, errorCode);
 		}
 
 		public bool ClearPlaylist()
@@ -136,16 +129,16 @@ namespace TwitchApiLib
 
 		public bool UpdatePlaylist(string formatId, bool clearCurrentPlaylist = false)
 		{
+			TwitchVodPlaylistResult playlistResult = GetPlaylist(formatId);
 			if (clearCurrentPlaylist)
 			{
-				Playlist = GetPlaylist(formatId);
+				Playlist = playlistResult.ErrorCode == 200 ? playlistResult.Playlist : null;
 				return Playlist != null;
 			}
 
-			TwitchVodPlaylist playlist = GetPlaylist(formatId);
-			if (playlist != null)
+			if (playlistResult.ErrorCode == 200)
 			{
-				Playlist = playlist;
+				Playlist = playlistResult.Playlist;
 				return true;
 			}
 
