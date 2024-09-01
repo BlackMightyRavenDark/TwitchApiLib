@@ -36,6 +36,13 @@ namespace TwitchApiLib
 			return FileName.Substring(0, n);
 		}
 
+		public int GetIdFromFileName()
+		{
+			string numberString = ExtractNumberFromFileName();
+			return !string.IsNullOrEmpty(numberString) &&
+				int.TryParse(numberString, out int number) ? number : -1;
+		}
+
 		public TwitchVodChunkState GetState()
 		{
 			if (FileName.EndsWith("-muted.ts"))
