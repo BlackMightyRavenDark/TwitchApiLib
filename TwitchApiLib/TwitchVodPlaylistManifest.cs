@@ -14,77 +14,85 @@ namespace TwitchApiLib
 		public TwitchVodPlaylistManifestItem this[string formatId] => FindManifestItemWithFormatId(formatId);
 		public TwitchVodPlaylistManifestItem this[int id] => Items[id];
 
+		private bool _isParsed = false;
+
 		public TwitchVodPlaylistManifest(string manifestRaw)
 		{
 			ManifestRaw = manifestRaw;
 			Items = new List<TwitchVodPlaylistManifestItem>();
-			Parse();
 		}
 
-		private void Parse()
+		public int Parse(bool anyway = false)
 		{
-			Items.Clear();
-
-			if (string.IsNullOrEmpty(ManifestRaw) || string.IsNullOrWhiteSpace(ManifestRaw))
+			if (anyway || !_isParsed)
 			{
-				return;
-			}
+				_isParsed = true;
 
-			List<string> fixedList = GetFixedList();
-			if (fixedList.Count < 2) { return; }
+				Items.Clear();
 
-			int max = fixedList.Count - 1;
-			for (int i = 0; i < max; i += 2)
-			{
-				string str = fixedList[i].Substring(fixedList[i].IndexOf(':') + 1);
-				Dictionary<string, string> dict = Utils.SplitStringToKeyValues(str, ",", '=');
-				if (dict == null)
+				if (string.IsNullOrEmpty(ManifestRaw) || string.IsNullOrWhiteSpace(ManifestRaw))
 				{
-					System.Diagnostics.Debug.WriteLine("Dictionary error in 'TwitchVodPlaylistManifest.Parse()'");
-					continue;
+					return 0;
 				}
 
-				int bandwidth = dict.ContainsKey("BANDWIDTH") ? int.Parse(dict["BANDWIDTH"]) : 0;
-				int videoWidth = 0;
-				int videoHeight = 0;
-				if (dict.ContainsKey("RESOLUTION"))
+				List<string> fixedList = GetFixedList();
+				if (fixedList.Count < 2) { return 0; }
+
+				int max = fixedList.Count - 1;
+				for (int i = 0; i < max; i += 2)
 				{
-					string res = dict["RESOLUTION"];
-					string[] resSplitted = res.Split('x');
-					if (resSplitted.Length == 2)
+					string str = fixedList[i].Substring(fixedList[i].IndexOf(':') + 1);
+					Dictionary<string, string> dict = Utils.SplitStringToKeyValues(str, ",", '=');
+					if (dict == null)
 					{
-						if (!int.TryParse(resSplitted[0], out videoWidth))
+						System.Diagnostics.Debug.WriteLine("Dictionary error in 'TwitchVodPlaylistManifest.Parse()'");
+						continue;
+					}
+
+					int bandwidth = dict.ContainsKey("BANDWIDTH") ? int.Parse(dict["BANDWIDTH"]) : 0;
+					int videoWidth = 0;
+					int videoHeight = 0;
+					if (dict.ContainsKey("RESOLUTION"))
+					{
+						string res = dict["RESOLUTION"];
+						string[] resSplitted = res.Split('x');
+						if (resSplitted.Length == 2)
 						{
-							videoWidth = 0;
-						}
-						if (!int.TryParse(resSplitted[1], out videoHeight))
-						{
-							videoHeight = 0;
+							if (!int.TryParse(resSplitted[0], out videoWidth))
+							{
+								videoWidth = 0;
+							}
+							if (!int.TryParse(resSplitted[1], out videoHeight))
+							{
+								videoHeight = 0;
+							}
 						}
 					}
-				}
 
-				string codecs = dict.ContainsKey("CODECS") ? RemoveQuotes(HttpUtility.UrlDecode(dict["CODECS"])) : null;
-				string formatId = dict.ContainsKey("VIDEO") ? RemoveQuotes(dict["VIDEO"]) : null;
-				int frameRate = 0;
-				if (dict.ContainsKey("FRAME-RATE"))
-				{
-					string rate = dict["FRAME-RATE"];
-					if (!string.IsNullOrEmpty(rate) && !string.IsNullOrWhiteSpace(rate))
+					string codecs = dict.ContainsKey("CODECS") ? RemoveQuotes(HttpUtility.UrlDecode(dict["CODECS"])) : null;
+					string formatId = dict.ContainsKey("VIDEO") ? RemoveQuotes(dict["VIDEO"]) : null;
+					int frameRate = 0;
+					if (dict.ContainsKey("FRAME-RATE"))
 					{
-						if (!double.TryParse(rate.Replace('.', ','), out double rateDouble))
+						string rate = dict["FRAME-RATE"];
+						if (!string.IsNullOrEmpty(rate) && !string.IsNullOrWhiteSpace(rate))
 						{
-							rateDouble = 0.0;
+							if (!double.TryParse(rate.Replace('.', ','), out double rateDouble))
+							{
+								rateDouble = 0.0;
+							}
+							frameRate = (int)Math.Round(rateDouble);
 						}
-						frameRate = (int)Math.Round(rateDouble);
 					}
-				}
-				string url = fixedList[i + 1];
+					string url = fixedList[i + 1];
 
-				TwitchVodPlaylistManifestItem manifestItem = new TwitchVodPlaylistManifestItem(
-					videoWidth, videoHeight, bandwidth, frameRate, codecs, formatId, url);
-				Items.Add(manifestItem);
+					TwitchVodPlaylistManifestItem manifestItem = new TwitchVodPlaylistManifestItem(
+						videoWidth, videoHeight, bandwidth, frameRate, codecs, formatId, url);
+					Items.Add(manifestItem);
+				}
 			}
+
+			return Items.Count;
 		}
 
 		public IEnumerable<TwitchVodPlaylistManifestItem> GetVideoItems()
