@@ -52,18 +52,24 @@ namespace TwitchApiLib
 			int errorCode = HttpGet_Helix(url, out string response);
 			if (errorCode == 200)
 			{
-				try
+				JObject json = TryParseJson(response, out string parsingResult);
+				if (json == null)
 				{
-					JObject json = JObject.Parse(response);
-					JArray jaData = json.Value<JArray>("data");
+					return new TwitchVodResult(null, 400, parsingResult, response);
+				}
 
-					return ParseVodInfo(jaData[0] as JObject);
-				}
-				catch (Exception ex)
+				JArray jaData = json.Value<JArray>("data");
+				if (jaData == null)
 				{
-					System.Diagnostics.Debug.WriteLine(ex.Message);
-					return new TwitchVodResult(null, ex.HResult, ex.Message, response);
+					return new TwitchVodResult(null, 404, "'data' not found", response);
 				}
+
+				if (jaData.Count == 0)
+				{
+					return new TwitchVodResult(null, 404, "The 'data' is empty", response);
+				}
+
+				return ParseVodInfo(jaData[0] as JObject);
 			}
 
 			return new TwitchVodResult(null, errorCode, null, response);
