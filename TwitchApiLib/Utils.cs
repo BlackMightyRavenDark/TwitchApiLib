@@ -327,27 +327,29 @@ namespace TwitchApiLib
 
 		private static int GetVodPlaybackAccessToken(string vodId, out JObject token, out string errorText)
 		{
-			try
+			JObject body = TwitchApiGql.GeneratePlaybackAccessTokenRequestBody(vodId, string.Empty);
+			int errorCode = HttpPost(TwitchApiGql.TWITCH_GQL_API_URL, body.ToString(), out string response);
+			if (errorCode == 200)
 			{
-				JObject body = TwitchApiGql.GeneratePlaybackAccessTokenRequestBody(vodId, string.Empty);
-				int errorCode = HttpPost(TwitchApiGql.TWITCH_GQL_API_URL, body.ToString(), out string response);
-				if (errorCode == 200)
+				JObject json = TryParseJson(response);
+				if (json != null)
 				{
-					JObject json = JObject.Parse(response);
-					token = json.Value<JObject>("data").Value<JObject>("videoPlaybackAccessToken");
-					errorText = null;
-					return 200;
+					token = json.Value<JObject>("data")?.Value<JObject>("videoPlaybackAccessToken");
+					if (token != null)
+					{
+						errorText = null;
+						return 200;
+					}
 				}
 
 				token = null;
-				errorText = null;
-				return errorCode;
-			} catch (Exception ex)
-			{
-				errorText = ex.Message;
-				token = null;
-				return ex.HResult;
+				errorText = "Token not found";
+				return 204;
 			}
+
+			token = null;
+			errorText = null;
+			return errorCode;
 		}
 
 		private static int GetVodPlaybackAccessToken(string vodId, out JObject token)
