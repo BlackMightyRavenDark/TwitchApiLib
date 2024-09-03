@@ -61,12 +61,12 @@ namespace TwitchApiLib
 				JArray jaData = json.Value<JArray>("data");
 				if (jaData == null)
 				{
-					return new TwitchVodResult(null, 404, "'data' not found", response);
+					return new TwitchVodResult(null, 204, "'data' not found", response);
 				}
 
 				if (jaData.Count == 0)
 				{
-					return new TwitchVodResult(null, 404, "The 'data' is empty", response);
+					return new TwitchVodResult(null, 204, "The 'data' is empty", response);
 				}
 
 				return ParseVodInfo(jaData[0] as JObject);
