@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using MultiThreadedDownloaderLib;
+using Newtonsoft.Json.Linq;
 using static TwitchApiLib.TwitchApi;
 
 namespace TwitchApiLib
@@ -114,6 +115,16 @@ namespace TwitchApiLib
 			}
 
 			return new TwitchVodPlaylistResult(null, errorCode);
+		}
+
+		public int GetPlaybackAccessToken(out JObject token, out string errorMessage)
+		{
+			return Utils.GetVodPlaybackAccessToken(Id, out token, out errorMessage);
+		}
+
+		public int GetPlaybackAccessToken(out JObject token)
+		{
+			return GetPlaybackAccessToken(out token, out _);
 		}
 
 		public bool ClearPlaylist()
