@@ -84,9 +84,9 @@ namespace TwitchApiLib.ConsoleTest
 							}
 							Console.WriteLine($"Url: {vodResult.Vod.Url}");
 							Console.WriteLine($"Access mode: {vodResult.Vod.PlaybackAccessMode}");
-							Console.WriteLine($"Thumbnail template URL: {vodResult.Vod.ThumbnailUrl}");
+							Console.WriteLine($"Thumbnail template URL: {vodResult.Vod.ThumbnailUrlTemplate}");
 							//TODO: Find a way to determine actual video resolution.
-							Console.WriteLine($"Thumbnail URL: {vodResult.Vod.FormatThumbnailUrl(1920, 1080)}");
+							Console.WriteLine($"Thumbnail URL: {vodResult.Vod.FormatThumbnailTemplateUrl(1920, 1080)}");
 							Console.WriteLine($"Viewable: {vodResult.Vod.Viewable}");
 							Console.WriteLine($"View count: {vodResult.Vod.ViewCount}");
 							Console.WriteLine($"Language: {vodResult.Vod.Language}");

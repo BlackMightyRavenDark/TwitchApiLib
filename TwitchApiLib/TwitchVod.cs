@@ -17,7 +17,7 @@ namespace TwitchApiLib
 		public DateTime PublishedDate { get; }
 		public DateTime DeletionDate { get; }
 		public string Url { get; }
-		public string ThumbnailUrl { get; }
+		public string ThumbnailUrlTemplate { get; }
 		public string Viewable { get; }
 		public ulong ViewCount { get; }
 		public string Language { get; }
@@ -38,7 +38,7 @@ namespace TwitchApiLib
 
 		public TwitchVod(ulong id, string title, string description, TimeSpan duration,
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
-			string url, string thumbnailUrl, string viewable, ulong viewCount,
+			string url, string thumbnailUrlTemplate, string viewable, ulong viewCount,
 			string language, TwitchVodType vodType, TwitchPlaybackAccessMode playbackAccessMode,
 			ulong streamId, TwitchUser user, string playlistUrl, TwitchVodPlaylist playlist,
 			string rawData, TwitchVideoMetadata rawMetadata)
@@ -52,7 +52,7 @@ namespace TwitchApiLib
 			PublishedDate = publishedDate;
 			DeletionDate = deletionDate;
 			Url = url;
-			ThumbnailUrl = thumbnailUrl;
+			ThumbnailUrlTemplate = thumbnailUrlTemplate;
 			Viewable = viewable;
 			ViewCount = viewCount;
 			Language = language;
@@ -80,8 +80,8 @@ namespace TwitchApiLib
 
 		private bool GetIsLive()
 		{
-			return !string.IsNullOrEmpty(ThumbnailUrl) &&
-				ThumbnailUrl.Contains("_404/404_processing_");
+			return !string.IsNullOrEmpty(ThumbnailUrlTemplate) &&
+				ThumbnailUrlTemplate.Contains("_404/404_processing_");
 		}
 
 		public int GetPlaylistUrl(out string playlistUrl, string formatId = "chunked")
@@ -168,12 +168,12 @@ namespace TwitchApiLib
 
 		public void GetSpecialData(out string specialId, out string serverId)
 		{
-			Utils.ExtractVodSpecialDataFromThumbnailUrl(ThumbnailUrl, out specialId, out serverId);
+			Utils.ExtractVodSpecialDataFromThumbnailUrl(ThumbnailUrlTemplate, out specialId, out serverId);
 		}
 
-		public string FormatThumbnailUrl(ushort imageWidth, ushort imageHeight)
+		public string FormatThumbnailTemplateUrl(ushort imageWidth, ushort imageHeight)
 		{
-			return ThumbnailUrl?
+			return ThumbnailUrlTemplate?
 				.Replace("%{width}", imageWidth.ToString())
 				.Replace("%{height}", imageHeight.ToString());
 		}
@@ -189,12 +189,13 @@ namespace TwitchApiLib
 		{
 			if (PreviewImageData != null) { return 200; }
 
-			if (string.IsNullOrEmpty(ThumbnailUrl) || string.IsNullOrWhiteSpace(ThumbnailUrl))
+			if (string.IsNullOrEmpty(ThumbnailUrlTemplate) ||
+				string.IsNullOrWhiteSpace(ThumbnailUrlTemplate))
 			{
 				return 400;
 			}
 
-			string url = FormatThumbnailUrl(width, height);
+			string url = FormatThumbnailTemplateUrl(width, height);
 
 			if (!string.IsNullOrEmpty(url) && !string.IsNullOrWhiteSpace(url))
 			{
