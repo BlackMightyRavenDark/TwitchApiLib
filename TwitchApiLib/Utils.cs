@@ -132,6 +132,43 @@ namespace TwitchApiLib
 				description, profileImageUrl, offlineImageUrl, viewCount, creationDate, rawData);
 		}
 
+		public static TwitchChannelLiveInfo ParseChannelLiveInfo(JObject liveInfo)
+		{
+			try
+			{
+				JArray jaData = liveInfo.Value<JArray>("data");
+				if (jaData.Count > 0)
+				{
+					JObject jData = jaData[0] as JObject;
+					ulong streamId = jData.Value<ulong>("id");
+					ulong userId = jData.Value<ulong>("user_id");
+					string userLogin = jData.Value<string>("user_login");
+					string userName = jData.Value<string>("user_name");
+					ulong gameId = jData.Value<ulong>("game_id");
+					string gameName = jData.Value<string>("game_name");
+					string streamType = jData.Value<string>("type");
+					string streamTitle = jData.Value<string>("title");
+					uint viewerCount = jData.Value<uint>("viewer_count");
+					DateTime startedAt = ParseDateTime(jData.Value<string>("started_at"));
+					string languageCode = jData.Value<string>("language");
+					string thumbnailUrlTemplate = jData.Value<string>("thumbnail_url");
+					string[] tags = jData.Value<JArray>("tags")?.ToObject<string[]>();
+					bool isMature = jData.Value<bool>("is_mature");
+
+					TwitchChannelLiveInfo live = new TwitchChannelLiveInfo(
+						streamId, userId, userLogin, userName, gameId, gameName,
+						streamType, streamTitle, viewerCount, startedAt,
+						languageCode, thumbnailUrlTemplate, tags, isMature);
+					return live;
+				}
+			} catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+			}
+
+			return null;
+		}
+
 		public static TwitchVodResult ParseVodInfo(JObject vodInfo)
 		{
 			try
@@ -323,6 +360,34 @@ namespace TwitchApiLib
 		public static int GetHelixOauthToken(out string responseToken)
 		{
 			return GetHelixOauthToken(TWITCH_CLIENT_ID, out responseToken);
+		}
+
+		public static TwitchChannelLiveInfoResult GetChannelLiveInfo_Helix(ulong channelId)
+		{
+			string url = $"{TWITCH_API_HELIX_STREAMS_ENDPOINT_URL}?user_id={channelId}";
+			int errorCode = HttpGet_Helix(url, out string response);
+			if (errorCode == 200)
+			{
+				JObject json = TryParseJson(response);
+				if (json == null)
+				{
+					return new TwitchChannelLiveInfoResult(null, 204);
+				}
+
+				TwitchChannelLiveInfo channelLiveInfo = ParseChannelLiveInfo(json);
+				if (channelLiveInfo == null) { errorCode = 204; }
+				return new TwitchChannelLiveInfoResult(channelLiveInfo, errorCode);
+			}
+
+			return new TwitchChannelLiveInfoResult(null, errorCode);
+		}
+
+		public static TwitchChannelLiveInfoResult GetChannelLiveInfo_Helix(string userLogin)
+		{
+			TwitchUserResult userResult = TwitchUser.Get(userLogin);
+			return userResult.ErrorCode == 200 ?
+				GetChannelLiveInfo_Helix(userResult.User.Id) :
+				new TwitchChannelLiveInfoResult(null, userResult.ErrorCode);
 		}
 
 		private static int GetVodPlaybackAccessToken(string vodId, out JObject token, out string errorText)
