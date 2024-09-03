@@ -291,6 +291,11 @@ namespace TwitchApiLib
 			return $"{TWITCH_API_HELIX_VIDEOS_ENDPOINT_URL}?{query}";
 		}
 
+		public static string GenerateChannelLiveInfoRequestUrl(ulong channelId)
+		{
+			return $"{TWITCH_API_HELIX_STREAMS_ENDPOINT_URL}?user_id={channelId}";
+		}
+
 		private static TwitchBroadcasterType GetBroadcasterType(string broadcasterType)
 		{
 			if (string.IsNullOrEmpty(broadcasterType) || string.IsNullOrWhiteSpace(broadcasterType))
@@ -364,7 +369,7 @@ namespace TwitchApiLib
 
 		public static TwitchChannelLiveInfoResult GetChannelLiveInfo_Helix(ulong channelId)
 		{
-			string url = $"{TWITCH_API_HELIX_STREAMS_ENDPOINT_URL}?user_id={channelId}";
+			string url = GenerateChannelLiveInfoRequestUrl(channelId);
 			int errorCode = HttpGet_Helix(url, out string response);
 			if (errorCode == 200)
 			{
