@@ -17,6 +17,7 @@ namespace TwitchApiLib
 		public string UserType { get; }
 		public TwitchBroadcasterType BroadcasterType { get; }
 		public TwitchPlaybackAccessMode StreamPlaybackAccessMode { get; }
+		public TwitchChannelLiveInfo LiveStreamInfo { get; private set; }
 		public string Description { get; }
 		public string ProfileImageUrl { get; }
 		public string OfflineImageUrl { get; }
@@ -175,6 +176,18 @@ namespace TwitchApiLib
 		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos)
 		{
 			return GetVideosMultiThreaded(maxVideos, 0, default);
+		}
+
+		public bool UpdateLiveStreamInfo(out TwitchChannelLiveInfoResult channelLiveInfoResult)
+		{
+			channelLiveInfoResult = TwitchChannelLiveInfo.Get(Id);
+			LiveStreamInfo = channelLiveInfoResult.LiveInfo;
+			return LiveStreamInfo != null;
+		}
+
+		public bool UpdateLiveStreamInfo()
+		{
+			return UpdateLiveStreamInfo(out _);
 		}
 	}
 }
