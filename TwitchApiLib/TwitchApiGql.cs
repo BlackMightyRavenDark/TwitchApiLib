@@ -14,7 +14,8 @@ namespace TwitchApiLib
 	{
 		public const string TWITCH_GQL_API_URL = "https://gql.twitch.tv/gql";
 		public const string TWITCH_GQL_CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko";
-		public const string TWITCH_USHER_PLAYLIST_URL_TEMPLATE = "https://usher.ttvnw.net/vod/{0}.m3u8";
+		public const string TWITCH_USHER_VOD_URL_TEMPLATE = "https://usher.ttvnw.net/vod/{0}.m3u8";
+		public const string TWITCH_USHER_HLS_URL_TEMPLATE = "https://usher.ttvnw.net/api/channel/hls/{0}.m3u8";
 
 		public static TwitchVideoMetadataResult GetVodMetadata(string vodId, string channelLogin)
 		{
@@ -74,8 +75,34 @@ namespace TwitchApiLib
 		}
 
 		public static JObject GeneratePlaybackAccessTokenRequestBody(
-			string vodId, string userLogin, bool isVod, bool isLive, string playerType = "embed")
+			string vodId, string userLogin, bool isVod, bool isLive,
+			bool getStreamPlaybackToken, string playerType = "embed")
 		{
+			if (getStreamPlaybackToken)
+			{
+				const string queryString = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, " +
+					"$vodID: ID!, $isVod: Boolean!, $playerType: String!) " +
+					"{  streamPlaybackAccessToken(channelName: $login, params: " +
+					"{platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}) " +
+					"@include(if: $isLive) {    value    signature    __typename  }  " +
+					"videoPlaybackAccessToken(id: $vodID, params: {platform: \"web\", playerBackend: " +
+					"\"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}";
+
+				JObject jVariablesLive = new JObject();
+				jVariablesLive["isLive"] = true;
+				jVariablesLive["login"] = userLogin;
+				jVariablesLive["isVod"] = false;
+				jVariablesLive["vodID"] = "";
+				jVariablesLive["playerType"] = playerType;
+
+				JObject jsonLive = new JObject();
+				jsonLive["operationName"] = "PlaybackAccessToken_Template";
+				jsonLive["query"] = queryString;
+				jsonLive.Add(new JProperty("variables", jVariablesLive));
+
+				return jsonLive;
+			}
+
 			const string hashValue = "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712";
 			JObject jPersistedQuery = new JObject();
 			jPersistedQuery["version"] = 1;
@@ -103,12 +130,18 @@ namespace TwitchApiLib
 		{
 			bool isVod = !string.IsNullOrEmpty(vodId) && !string.IsNullOrWhiteSpace(vodId);
 			bool isLogin = !string.IsNullOrEmpty(userLogin) && !string.IsNullOrWhiteSpace(userLogin);
-			return GeneratePlaybackAccessTokenRequestBody(vodId, userLogin, isVod, isLogin);
+			return GeneratePlaybackAccessTokenRequestBody(vodId, userLogin, isVod, isLogin, false);
 		}
 
 		public static JObject GeneratePlaybackAccessTokenRequestBody(string vodId)
 		{
-			return GeneratePlaybackAccessTokenRequestBody(vodId, string.Empty, true, false);
+			return GeneratePlaybackAccessTokenRequestBody(vodId, string.Empty, true, false, false);
+		}
+
+		public static JObject GenerateStreamPlaybackAccessTokenRequestBody(
+			string channelName, string playerType = "site")
+		{
+			return GeneratePlaybackAccessTokenRequestBody(null, channelName, false, true, true, playerType);
 		}
 
 		public static string GenerateVodPlaylistManifestUrl(string vodId, JObject vodPlaybackAccessToken)
@@ -116,7 +149,7 @@ namespace TwitchApiLib
 			string tokenValue = vodPlaybackAccessToken.Value<string>("value");
 			string tokenSignature = vodPlaybackAccessToken.Value<string>("signature");
 
-			string usherUrl = string.Format(TWITCH_USHER_PLAYLIST_URL_TEMPLATE, vodId);
+			string usherUrl = string.Format(TWITCH_USHER_VOD_URL_TEMPLATE, vodId);
 			Random random = new Random((int)DateTime.UtcNow.Ticks);
 			int randomNumber = random.Next(999999);
 
@@ -131,6 +164,40 @@ namespace TwitchApiLib
 
 			string url = $"{usherUrl}?{query}";
 			return url;
+		}
+
+		public static ITwitchPlaybackAccessToken GetChannelPlaybackAccessToken(
+			string channelName, Guid deviceId)
+		{
+			JObject body = GenerateStreamPlaybackAccessTokenRequestBody(channelName);
+
+			/*
+			 * Заголовок "Device-ID" нужен для предотвращения показа рекламы в начале видео.
+			 * Если этого заголовка нет, твич вставляет 15-секундную рекламную вставку в начало каждого плейлиста.
+			 * TODO: Каким-то образом получить правильное значение "deviceId" из API.
+			 */
+			while (deviceId == Guid.Empty) { deviceId = Guid.NewGuid(); }
+
+			string userAgent = GetUserAgent();
+
+			NameValueCollection headers = new NameValueCollection();
+			headers.Add("User-Agent", userAgent);
+			headers.Add("Host", "gql.twitch.tv");
+			headers.Add("Client-ID", TWITCH_GQL_CLIENT_ID);
+			headers.Add("Content-Type", "text/plain; charset=UTF-8");
+			if (deviceId != null)
+			{
+				headers.Add("Device-ID", deviceId.ToString());
+			}
+
+			int errorCode = Utils.HttpPost(TWITCH_GQL_API_URL, body.ToString(), headers, out string response);
+			ITwitchPlaybackAccessToken token = new TwitchStreamPlaybackAccessToken(response, errorCode);
+			return token;
+		}
+
+		public static ITwitchPlaybackAccessToken GetChannelPlaybackAccessToken(string channelName)
+		{
+			return GetChannelPlaybackAccessToken(channelName, Guid.Empty);
 		}
 
 		public static TwitchGameResult GetVodGameInfo(string vodId)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Specialized;
+using Newtonsoft.Json.Linq;
 
 namespace TwitchApiLib
 {
@@ -49,6 +51,61 @@ namespace TwitchApiLib
 		public static TwitchChannelLiveInfoResult Get(string userLogin)
 		{
 			return Utils.GetChannelLiveInfo_Helix(userLogin);
+		}
+
+		public int GetHlsPlaylistManifestUrl(Guid deviceId,
+			out string playlistManifestUrl, out string errorMessage)
+		{
+			ITwitchPlaybackAccessToken accessToken =
+				TwitchApiGql.GetChannelPlaybackAccessToken(UserLogin, deviceId);
+			if (accessToken.ErrorCode == 200)
+			{
+				JObject token = accessToken.GetToken(out errorMessage);
+				if (!string.IsNullOrEmpty(errorMessage))
+				{
+					playlistManifestUrl = null;
+					return 400;
+				}
+
+				string tokenValue = token.Value<string>("value");
+				string tokenSignature = token.Value<string>("signature");
+
+				int randomInt = new Random((int)DateTime.UtcNow.Ticks).Next(999999);
+
+				NameValueCollection query = System.Web.HttpUtility.ParseQueryString(string.Empty);
+				query.Add("acmb", "e30=");
+				query.Add("allow_source", "true");
+				query.Add("fast_bread", "true");
+				query.Add("p", randomInt.ToString());
+				query.Add("player_backend", "mediaplayer");
+				query.Add("playlist_include_framerate", "true");
+				query.Add("reassignments_supported", "true");
+				query.Add("sig", tokenSignature);
+				query.Add("supported_codecs", "avc1");
+				query.Add("transcode_mode", "cbr_v1");
+				query.Add("cdm", "wv");
+				query.Add("player_version", "1.20.0");
+				query.Add("token", tokenValue);
+
+				string usherUrlFormatted = string.Format(TwitchApiGql.TWITCH_USHER_HLS_URL_TEMPLATE, UserLogin);
+				playlistManifestUrl = $"{usherUrlFormatted}?{query}";
+
+				return 200;
+			}
+
+			playlistManifestUrl = null;
+			errorMessage = accessToken.RawData;
+			return accessToken.ErrorCode;
+		}
+
+		public int GetHlsPlaylistManifestUrl(out string playlistManifestUrl, out string errorMessage)
+		{
+			return GetHlsPlaylistManifestUrl(Guid.Empty, out playlistManifestUrl, out errorMessage);
+		}
+
+		public int GetHlsPlaylistManifestUrl(out string playlistManifestUrl)
+		{
+			return GetHlsPlaylistManifestUrl(out playlistManifestUrl, out _);
 		}
 
 		public string FormatThumbnailTemplateUrl(ushort imageWidth, ushort imageHeight)

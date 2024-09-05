@@ -657,19 +657,26 @@ namespace TwitchApiLib
 
 		public static int HttpPost(string url, string body, out string response)
 		{
+			NameValueCollection headers = null;
+			if (!string.IsNullOrEmpty(body))
+			{
+				string userAgent = GetUserAgent();
+				headers = new NameValueCollection
+				{
+					{ "Content-Type", "application/json" },
+					{ "Client-ID", TwitchApiGql.TWITCH_GQL_CLIENT_ID },
+					{ "User-Agent", userAgent }
+				};
+			}
+
+			return HttpPost(url, body, headers, out response);
+		}
+
+		public static int HttpPost(string url, string body,
+			NameValueCollection headers, out string response)
+		{
 			try
 			{
-				NameValueCollection headers = null;
-				if (!string.IsNullOrEmpty(body))
-				{
-					headers = new NameValueCollection
-					{
-						{ "Content-Type", "application/json" },
-						{ "Client-ID", TwitchApiGql.TWITCH_GQL_CLIENT_ID },
-						{ "User-Agent", GetUserAgent() }
-					};
-				}
-
 				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
 				{
 					return requestResult.WebContent.ContentToString(out response);
