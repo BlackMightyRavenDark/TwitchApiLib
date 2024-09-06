@@ -523,7 +523,7 @@ namespace TwitchApiLib
 			if (!isSubscribersOnly)
 			{
 				TwitchVodPlaylistManifestResult playlistManifestResult = GetVodPlaylistManifest(vodId, false);
-				if (playlistManifestResult.ErrorCode == 200)
+				if (playlistManifestResult.ErrorCode == 200 && playlistManifestResult.PlaylistManifest.Parse() > 0)
 				{
 					TwitchVodPlaylistManifestItem manifestItem = playlistManifestResult.PlaylistManifest[formatId];
 					if (manifestItem != null)
@@ -531,16 +531,11 @@ namespace TwitchApiLib
 						playlistUrl = manifestItem.PlaylistUrl;
 						return 200;
 					}
-					else if (playlistManifestResult.PlaylistManifest.Count > 0)
+					else
 					{
 						playlistManifestResult.PlaylistManifest.SortByBandwidth();
 						playlistUrl = playlistManifestResult.PlaylistManifest[0].PlaylistUrl;
 						return 200;
-					}
-					else
-					{
-						playlistUrl = null;
-						return 404;
 					}
 				}
 			}
