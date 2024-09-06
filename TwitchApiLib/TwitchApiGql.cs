@@ -32,21 +32,29 @@ namespace TwitchApiLib
 		public static JArray GenerateVodInfoRequestBody(string vodId, string channelLogin)
 		{
 			const string hashValue = "cb3b1eb2f2d2b2f65b8389ba446ec521d76c3aa44f5424a1b1d235fe21eb4806";
-			JObject jPersistedQuery = new JObject();
-			jPersistedQuery["version"] = 1;
-			jPersistedQuery["sha256Hash"] = hashValue;
+			JObject jPersistedQuery = new JObject()
+			{
+				["version"] = 1,
+				["sha256Hash"] = hashValue
+			};
 
-			JObject jExtensions = new JObject();
-			jExtensions.Add(new JProperty("persistedQuery", jPersistedQuery));
+			JObject jExtensions = new JObject()
+			{
+				["persistedQuery"] = jPersistedQuery
+			};
 
-			JObject jVariables = new JObject();
-			jVariables["channelLogin"] = channelLogin;
-			jVariables["videoID"] = vodId;
+			JObject jVariables = new JObject()
+			{
+				["channelLogin"] = channelLogin,
+				["videoID"] = vodId
+			};
 
-			JObject json = new JObject();
-			json["operationName"] = "VideoMetadata";
-			json.Add(new JProperty("variables", jVariables));
-			json.Add(new JProperty("extensions", jExtensions));
+			JObject json = new JObject()
+			{
+				["operationName"] = "VideoMetadata",
+				["variables"] = jVariables,
+				["extensions"] = jExtensions
+			};
 
 			JArray jArray = new JArray() { json };
 			return jArray;
@@ -55,21 +63,29 @@ namespace TwitchApiLib
 		public static JObject GenerateVodGameInfoRequestBody(string vodId)
 		{
 			const string hashValue = "38bbbbd9ae2e0150f335e208b05cf09978e542b464a78c2d4952673cd02ea42b";
-			JObject jPersistedQuery = new JObject();
-			jPersistedQuery["version"] = 1;
-			jPersistedQuery["sha256Hash"] = hashValue;
+			JObject jPersistedQuery = new JObject()
+			{
+				["version"] = 1,
+				["sha256Hash"] = hashValue
+			};
 
-			JObject jExtensions = new JObject();
-			jExtensions.Add(new JProperty("persistedQuery", jPersistedQuery));
+			JObject jExtensions = new JObject()
+			{
+				["persistedQuery"] = jPersistedQuery
+			};
 
-			JObject jVariables = new JObject();
-			jVariables["videoID"] = vodId;
-			jVariables["hasVideoID"] = true;
+			JObject jVariables = new JObject()
+			{
+				["videoID"] = vodId,
+				["hasVideoID"] = true
+			};
 
-			JObject json = new JObject();
-			json["operationName"] = "WatchTrackQuery";
-			json.Add(new JProperty("variables", jVariables));
-			json.Add(new JProperty("extensions", jExtensions));
+			JObject json = new JObject()
+			{
+				["operationName"] = "WatchTrackQuery",
+				["variables"] = jVariables,
+				["extensions"] = jExtensions
+			};
 
 			return json;
 		}
@@ -82,46 +98,58 @@ namespace TwitchApiLib
 			{
 				const string queryString = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, " +
 					"$vodID: ID!, $isVod: Boolean!, $playerType: String!) " +
-					"{  streamPlaybackAccessToken(channelName: $login, params: " +
+					"{streamPlaybackAccessToken(channelName: $login, params: " +
 					"{platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}) " +
-					"@include(if: $isLive) {    value    signature    __typename  }  " +
+					"@include(if: $isLive) {value signature __typename} " +
 					"videoPlaybackAccessToken(id: $vodID, params: {platform: \"web\", playerBackend: " +
-					"\"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}";
+					"\"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {value signature __typename}}";
 
-				JObject jVariablesLive = new JObject();
-				jVariablesLive["isLive"] = true;
-				jVariablesLive["login"] = userLogin;
-				jVariablesLive["isVod"] = false;
-				jVariablesLive["vodID"] = "";
-				jVariablesLive["playerType"] = playerType;
+				JObject jVariablesLive = new JObject()
+				{
+					["isLive"] = true,
+					["login"] = userLogin,
+					["isVod"] = false,
+					["vodID"] = "",
+					["playerType"] = playerType
+				};
 
-				JObject jsonLive = new JObject();
-				jsonLive["operationName"] = "PlaybackAccessToken_Template";
-				jsonLive["query"] = queryString;
-				jsonLive.Add(new JProperty("variables", jVariablesLive));
+				JObject jsonLive = new JObject()
+				{
+					["operationName"] = "PlaybackAccessToken_Template",
+					["query"] = queryString,
+					["variables"] = jVariablesLive
+				};
 
 				return jsonLive;
 			}
 
 			const string hashValue = "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712";
-			JObject jPersistedQuery = new JObject();
-			jPersistedQuery["version"] = 1;
-			jPersistedQuery["sha256Hash"] = hashValue;
+			JObject jPersistedQuery = new JObject()
+			{
+				["version"] = 1,
+				["sha256Hash"] = hashValue
+			};
 
-			JObject jExtensions = new JObject();
-			jExtensions.Add(new JProperty("persistedQuery", jPersistedQuery));
+			JObject jExtensions = new JObject()
+			{
+				["persistedQuery"] = jPersistedQuery
+			};
 
-			JObject jVariables = new JObject();
-			jVariables["isLive"] = isLive;
-			jVariables["login"] = userLogin;
-			jVariables["isVod"] = isVod;
-			jVariables["vodID"] = vodId;
-			jVariables["playerType"] = playerType;
+			JObject jVariables = new JObject()
+			{
+				["isLive"] = isLive,
+				["login"] = userLogin,
+				["isVod"] = isVod,
+				["vodID"] = vodId,
+				["playerType"] = playerType
+			};
 
-			JObject json = new JObject();
-			json["operationName"] = "PlaybackAccessToken";
-			json.Add(new JProperty("extensions", jExtensions));
-			json.Add(new JProperty("variables", jVariables));
+			JObject json = new JObject()
+			{
+				["operationName"] = "PlaybackAccessToken",
+				["extensions"] = jExtensions,
+				["variables"] = jVariables
+			};
 
 			return json;
 		}
@@ -180,11 +208,13 @@ namespace TwitchApiLib
 
 			string userAgent = GetUserAgent();
 
-			NameValueCollection headers = new NameValueCollection();
-			headers.Add("User-Agent", userAgent);
-			headers.Add("Host", "gql.twitch.tv");
-			headers.Add("Client-ID", TWITCH_GQL_CLIENT_ID);
-			headers.Add("Content-Type", "text/plain; charset=UTF-8");
+			NameValueCollection headers = new NameValueCollection()
+			{
+				{ "User-Agent", userAgent },
+				{ "Host", "gql.twitch.tv" },
+				{ "Client-ID", TWITCH_GQL_CLIENT_ID },
+				{ "Content-Type", "text/plain; charset=UTF-8" }
+			};
 			if (deviceId != null)
 			{
 				headers.Add("Device-ID", deviceId.ToString());

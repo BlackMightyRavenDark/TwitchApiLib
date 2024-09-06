@@ -650,9 +650,22 @@ namespace TwitchApiLib
 			return errorCode;
 		}
 
-		public static int HttpPost(string url, out string response)
+		public static int HttpPost(string url, string body,
+			NameValueCollection headers, out string response)
 		{
-			return HttpPost(url, null, out response);
+			try
+			{
+				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
+				{
+					return requestResult.WebContent.ContentToString(out response);
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+				response = ex.Message;
+				return ex.HResult;
+			}
 		}
 
 		public static int HttpPost(string url, string body, out string response)
@@ -672,22 +685,9 @@ namespace TwitchApiLib
 			return HttpPost(url, body, headers, out response);
 		}
 
-		public static int HttpPost(string url, string body,
-			NameValueCollection headers, out string response)
+		public static int HttpPost(string url, out string response)
 		{
-			try
-			{
-				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
-				{
-					return requestResult.WebContent.ContentToString(out response);
-				}
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-				response = ex.Message;
-				return ex.HResult;
-			}
+			return HttpPost(url, null, out response);
 		}
 
 		internal static JObject TryParseJson(string jsonString, out string errorMessage)
