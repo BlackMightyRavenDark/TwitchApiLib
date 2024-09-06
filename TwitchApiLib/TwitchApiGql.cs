@@ -222,25 +222,24 @@ namespace TwitchApiLib
 				channelName = string.Empty;
 			}
 
-			try
+			JObject body = GeneratePlaybackAccessTokenRequestBody(vodId, channelName.ToLower());
+			int errorCode = Utils.HttpPost(TWITCH_GQL_API_URL, body.ToString(), out string response);
+			if (errorCode == 200)
 			{
-				JObject body = GeneratePlaybackAccessTokenRequestBody(vodId, channelName.ToLower());
-				int errorCode = Utils.HttpPost(TWITCH_GQL_API_URL, body.ToString(), out string response);
-				if (errorCode == 200)
+				ITwitchPlaybackAccessToken playbackAccessToken = !string.IsNullOrEmpty(channelName) ?
+					(ITwitchPlaybackAccessToken)new TwitchStreamPlaybackAccessToken(response, 200) :
+					(ITwitchPlaybackAccessToken)new TwitchVideoPlaybackAccessToken(response, 200);
+				JObject jPlaybackAccessToken = playbackAccessToken.GetToken();
+				if (jPlaybackAccessToken != null)
 				{
-					JObject json = JObject.Parse(response);
-					string nodeName = !string.IsNullOrEmpty(channelName) ?
-						"streamPlaybackAccessToken" : "videoPlaybackAccessToken";
-					string tokenValue = json.Value<JObject>("data").Value<JObject>(nodeName).Value<string>("value");
-					JObject jTokenValue = JObject.Parse(tokenValue);
-					JArray jsonArr = jTokenValue.Value<JObject>("chansub").Value<JArray>("restricted_bitrates");
-
-					bool isPrime = jsonArr != null && jsonArr.Count > 0;
-					return isPrime ? TwitchPlaybackAccessMode.SubscribersOnly : TwitchPlaybackAccessMode.Free;
+					JObject tokenValue = Utils.TryParseJson(jPlaybackAccessToken.Value<string>("value"));
+					JArray jaRestrictedBitrates = tokenValue?.Value<JObject>("chansub")?.Value<JArray>("restricted_bitrates");
+					if (jaRestrictedBitrates != null)
+					{
+						bool isPrime = jaRestrictedBitrates.Count > 0;
+						return isPrime ? TwitchPlaybackAccessMode.SubscribersOnly : TwitchPlaybackAccessMode.Free;
+					}
 				}
-			} catch (Exception ex)
-			{
-				errorText = ex.Message;
 			}
 
 			return TwitchPlaybackAccessMode.Unknown;
