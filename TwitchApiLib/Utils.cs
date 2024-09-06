@@ -593,6 +593,24 @@ namespace TwitchApiLib
 			return GetVodPlaylistUrl(vod, "chunked", out playlistUrl);
 		}
 
+		public static TwitchPlaybackAccessMode GetPlaybackAccessMode(
+			ITwitchPlaybackAccessToken twitchPlaybackAccessToken)
+		{
+			JObject jPlaybackAccessToken = twitchPlaybackAccessToken.GetToken();
+			if (jPlaybackAccessToken != null)
+			{
+				JObject tokenValue = TryParseJson(jPlaybackAccessToken.Value<string>("value"));
+				JArray jaRestrictedBitrates = tokenValue?.Value<JObject>("chansub")?.Value<JArray>("restricted_bitrates");
+				if (jaRestrictedBitrates != null)
+				{
+					bool isPrime = jaRestrictedBitrates.Count > 0;
+					return isPrime ? TwitchPlaybackAccessMode.SubscribersOnly : TwitchPlaybackAccessMode.Free;
+				}
+			}
+
+			return TwitchPlaybackAccessMode.Unknown;
+		}
+
 		internal static Dictionary<string, string> SplitStringToKeyValues(
 			string inputString, string keySeparator, char valueSeparator)
 		{

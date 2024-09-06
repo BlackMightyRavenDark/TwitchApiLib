@@ -259,17 +259,7 @@ namespace TwitchApiLib
 				ITwitchPlaybackAccessToken playbackAccessToken = !string.IsNullOrEmpty(channelName) ?
 					(ITwitchPlaybackAccessToken)new TwitchStreamPlaybackAccessToken(response, 200) :
 					(ITwitchPlaybackAccessToken)new TwitchVideoPlaybackAccessToken(response, 200);
-				JObject jPlaybackAccessToken = playbackAccessToken.GetToken();
-				if (jPlaybackAccessToken != null)
-				{
-					JObject tokenValue = Utils.TryParseJson(jPlaybackAccessToken.Value<string>("value"));
-					JArray jaRestrictedBitrates = tokenValue?.Value<JObject>("chansub")?.Value<JArray>("restricted_bitrates");
-					if (jaRestrictedBitrates != null)
-					{
-						bool isPrime = jaRestrictedBitrates.Count > 0;
-						return isPrime ? TwitchPlaybackAccessMode.SubscribersOnly : TwitchPlaybackAccessMode.Free;
-					}
-				}
+				return Utils.GetPlaybackAccessMode(playbackAccessToken);
 			}
 
 			return TwitchPlaybackAccessMode.Unknown;
