@@ -9,8 +9,8 @@ namespace TwitchApiLib
 {
 	public static class Utils
 	{
-		const string TWITCH_VOD_PLAYLIST_ARCHIEVE_TEMPLATE_URL = "https://{0}.cloudfront.net/{1}/{2}/index-dvr.m3u8";
-		const string TWITCH_PLAYLIST_HIGHLIGHT_TEMPLATE_URL = "https://{0}.cloudfront.net/{1}/{2}/highlight-{3}.m3u8";
+		const string TWITCH_VOD_PLAYLIST_ARCHIEVE_URL_TEMPLATE = "https://{0}.cloudfront.net/{1}/{2}/index-dvr.m3u8";
+		const string TWITCH_PLAYLIST_HIGHLIGHT_URL_TEMPLATE = "https://{0}.cloudfront.net/{1}/{2}/highlight-{3}.m3u8";
 
 		public static readonly TwitchHelixOauthToken TwitchHelixOauthToken = new TwitchHelixOauthToken();
 
@@ -557,7 +557,7 @@ namespace TwitchApiLib
 						return 400;
 					}
 
-					playlistUrl = string.Format(TWITCH_PLAYLIST_HIGHLIGHT_TEMPLATE_URL, serverId, vodSpecialId, formatId, vodId);
+					playlistUrl = string.Format(TWITCH_PLAYLIST_HIGHLIGHT_URL_TEMPLATE, serverId, vodSpecialId, formatId, vodId);
 					return 200;
 
 				case TwitchVodType.Upload:
@@ -566,7 +566,7 @@ namespace TwitchApiLib
 					return 404;
 
 				default:
-					playlistUrl = string.Format(TWITCH_VOD_PLAYLIST_ARCHIEVE_TEMPLATE_URL, serverId, vodSpecialId, formatId);
+					playlistUrl = string.Format(TWITCH_VOD_PLAYLIST_ARCHIEVE_URL_TEMPLATE, serverId, vodSpecialId, formatId);
 					return 200;
 			}
 		}
