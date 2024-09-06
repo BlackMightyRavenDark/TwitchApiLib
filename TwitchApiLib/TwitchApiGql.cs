@@ -259,7 +259,7 @@ namespace TwitchApiLib
 				ITwitchPlaybackAccessToken playbackAccessToken = !string.IsNullOrEmpty(channelName) ?
 					(ITwitchPlaybackAccessToken)new TwitchStreamPlaybackAccessToken(response, 200) :
 					(ITwitchPlaybackAccessToken)new TwitchVideoPlaybackAccessToken(response, 200);
-				return Utils.GetPlaybackAccessMode(playbackAccessToken);
+				return playbackAccessToken.GetPlaybackAccessMode();
 			}
 
 			return TwitchPlaybackAccessMode.Unknown;

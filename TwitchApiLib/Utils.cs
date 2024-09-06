@@ -589,7 +589,7 @@ namespace TwitchApiLib
 		}
 
 		public static TwitchPlaybackAccessMode GetPlaybackAccessMode(
-			ITwitchPlaybackAccessToken twitchPlaybackAccessToken)
+			this ITwitchPlaybackAccessToken twitchPlaybackAccessToken)
 		{
 			JObject jPlaybackAccessToken = twitchPlaybackAccessToken.GetToken();
 			if (jPlaybackAccessToken != null)
