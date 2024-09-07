@@ -493,7 +493,26 @@ namespace TwitchApiLib
 			return GetVodPlaylistManifest(vod.Id.ToString(), vod.IsSubscribersOnly);
 		}
 
-		public static void ExtractVodSpecialDataFromThumbnailUrl(string thumbnailUrl,
+		public static TwitchPlaylistManifestItemResult GetVodPlaylistManifestItem(
+			TwitchVod vod, string formatId)
+		{
+			TwitchPlaylistManifestResult manifestResult = GetVodPlaylistManifest(vod);
+			if (manifestResult.ErrorCode == 200)
+			{
+				if (manifestResult.PlaylistManifest.Parse() > 0)
+				{
+					TwitchPlaylistManifestItem item = manifestResult.PlaylistManifest[formatId];
+					int errorCode = item != null ? 200 : 404;
+					return new TwitchPlaylistManifestItemResult(item, errorCode);
+				}
+
+				return new TwitchPlaylistManifestItemResult(null, 204);
+			}
+
+			return new TwitchPlaylistManifestItemResult(null, manifestResult.ErrorCode);
+		}
+
+        public static void ExtractVodSpecialDataFromThumbnailUrl(string thumbnailUrl,
 			out string specialId, out string serverId)
 		{
 			if (string.IsNullOrEmpty(thumbnailUrl) || string.IsNullOrWhiteSpace(thumbnailUrl))

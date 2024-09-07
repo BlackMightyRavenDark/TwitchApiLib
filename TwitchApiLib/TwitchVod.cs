@@ -101,20 +101,36 @@ namespace TwitchApiLib
 
 		public TwitchPlaylistResult GetPlaylist(string formatId = "chunked")
 		{
-			int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
-			if (errorCode == 200)
 			{
-				FileDownloader d = new FileDownloader() { Url = playlistUrl };
-				errorCode = d.DownloadString(out string playlistRaw);
-				d.Dispose();
-				if (errorCode == 200)
+				TwitchPlaylistManifestItemResult manifestItemResult = Utils.GetVodPlaylistManifestItem(this, formatId);
+				if (manifestItemResult.ErrorCode == 200)
 				{
-					TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl);
-					return new TwitchPlaylistResult(playlist, 200);
+					FileDownloader d = new FileDownloader() { Url = manifestItemResult.PlaylistManifestItem.PlaylistUrl };
+					int errorCode = d.DownloadString(out string playlistRaw);
+					d.Dispose();
+					if (errorCode == 200)
+					{
+						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, manifestItemResult.PlaylistManifestItem.PlaylistUrl);
+						return new TwitchPlaylistResult(playlist, 200);
+					}
 				}
 			}
+			{
+				int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
+				if (errorCode == 200)
+				{
+					FileDownloader d = new FileDownloader() { Url = playlistUrl };
+					errorCode = d.DownloadString(out string playlistRaw);
+					d.Dispose();
+					if (errorCode == 200)
+					{
+						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl);
+						return new TwitchPlaylistResult(playlist, 200);
+					}
+				}
 
-			return new TwitchPlaylistResult(null, errorCode);
+				return new TwitchPlaylistResult(null, errorCode);
+			}
 		}
 
 		public int GetPlaybackAccessToken(out JObject token, out string errorMessage)
