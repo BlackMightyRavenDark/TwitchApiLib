@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using MultiThreadedDownloaderLib;
 using Newtonsoft.Json.Linq;
 
 namespace TwitchApiLib
@@ -106,6 +107,22 @@ namespace TwitchApiLib
 		public int GetHlsPlaylistManifestUrl(out string playlistManifestUrl)
 		{
 			return GetHlsPlaylistManifestUrl(out playlistManifestUrl, out _);
+		}
+
+		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest()
+		{
+			int errorCode = GetHlsPlaylistManifestUrl(out string manifestUrl);
+			if (errorCode == 200)
+			{
+				FileDownloader d = new FileDownloader() { Url = manifestUrl };
+				errorCode = d.DownloadString(out string manifestText);
+				d.Dispose();
+				TwitchVodPlaylistManifest playlistManifest = errorCode == 200 ?
+					new TwitchVodPlaylistManifest(manifestText) : null;
+				return new TwitchVodPlaylistManifestResult(playlistManifest, errorCode);
+			}
+
+			return new TwitchVodPlaylistManifestResult(null, errorCode);
 		}
 
 		public string FormatThumbnailTemplateUrl(ushort imageWidth, ushort imageHeight)
