@@ -3,7 +3,7 @@ using MultiThreadedDownloaderLib;
 
 namespace TwitchApiLib
 {
-	public class TwitchVodPlaylistManifestItem
+	public class TwitchPlaylistManifestItem
 	{
 		public int ResolutionWidth { get; }
 		public int ResolutionHeight { get; }
@@ -13,7 +13,7 @@ namespace TwitchApiLib
 		public string FormatId { get; }
 		public string PlaylistUrl { get; }
 
-		public TwitchVodPlaylistManifestItem(int resolutionWidth, int resolutionHeight, int bandwidth,
+		public TwitchPlaylistManifestItem(int resolutionWidth, int resolutionHeight, int bandwidth,
 			int frameRate, string codecs, string formatId, string playlistUrl)
 		{
 			ResolutionWidth = resolutionWidth;
@@ -30,20 +30,20 @@ namespace TwitchApiLib
 			return !string.IsNullOrEmpty(FormatId) && FormatId.Contains("audio_only");
 		}
 
-		public TwitchVodPlaylistResult GetPlaylist()
+		public TwitchPlaylistResult GetPlaylist()
 		{
 			if (!string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl))
 			{
 				FileDownloader d = new FileDownloader() { Url = PlaylistUrl };
 				int errorCode = d.DownloadString(out string response);
-				TwitchVodPlaylistResult playlistResult = errorCode == 200 ?
-					new TwitchVodPlaylistResult(new TwitchVodPlaylist(response, PlaylistUrl), 200) :
-					new TwitchVodPlaylistResult(null, errorCode);
+				TwitchPlaylistResult playlistResult = errorCode == 200 ?
+					new TwitchPlaylistResult(new TwitchPlaylist(response, PlaylistUrl), 200) :
+					new TwitchPlaylistResult(null, errorCode);
 				d.Dispose();
 				return playlistResult;
 			}
 
-			return new TwitchVodPlaylistResult(null, 400);
+			return new TwitchPlaylistResult(null, 400);
 		}
 
 		public override string ToString()

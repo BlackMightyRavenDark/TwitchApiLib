@@ -6,20 +6,20 @@ using System.Web;
 
 namespace TwitchApiLib
 {
-	public class TwitchVodPlaylistManifest
+	public class TwitchPlaylistManifest
 	{
 		public string ManifestRaw { get; }
-		public List<TwitchVodPlaylistManifestItem> Items { get; }
+		public List<TwitchPlaylistManifestItem> Items { get; }
 		public int Count => Items != null ? Items.Count : 0;
-		public TwitchVodPlaylistManifestItem this[string formatId] => FindManifestItemWithFormatId(formatId);
-		public TwitchVodPlaylistManifestItem this[int id] => Items[id];
+		public TwitchPlaylistManifestItem this[string formatId] => FindManifestItemWithFormatId(formatId);
+		public TwitchPlaylistManifestItem this[int id] => Items[id];
 
 		private bool _isParsed = false;
 
-		public TwitchVodPlaylistManifest(string manifestRaw)
+		public TwitchPlaylistManifest(string manifestRaw)
 		{
 			ManifestRaw = manifestRaw;
-			Items = new List<TwitchVodPlaylistManifestItem>();
+			Items = new List<TwitchPlaylistManifestItem>();
 		}
 
 		public int Parse(bool anyway = false)
@@ -86,7 +86,7 @@ namespace TwitchApiLib
 					}
 					string url = fixedList[i + 1];
 
-					TwitchVodPlaylistManifestItem manifestItem = new TwitchVodPlaylistManifestItem(
+					TwitchPlaylistManifestItem manifestItem = new TwitchPlaylistManifestItem(
 						videoWidth, videoHeight, bandwidth, frameRate, codecs, formatId, url);
 					Items.Add(manifestItem);
 				}
@@ -95,12 +95,12 @@ namespace TwitchApiLib
 			return Items.Count;
 		}
 
-		public IEnumerable<TwitchVodPlaylistManifestItem> GetVideoItems()
+		public IEnumerable<TwitchPlaylistManifestItem> GetVideoItems()
 		{
 			return Items.Where(item => !item.IsAudioOnly());
 		}
 
-		public IEnumerable<TwitchVodPlaylistManifestItem> GetAudioItems()
+		public IEnumerable<TwitchPlaylistManifestItem> GetAudioItems()
 		{
 			return Items.Where(item => item.IsAudioOnly());
 		}
@@ -121,8 +121,8 @@ namespace TwitchApiLib
 					return x.Bandwidth > y.Bandwidth ? -1 : 1;
 				});
 
-				TwitchVodPlaylistManifestItem[] videoItems = GetVideoItems().ToArray();
-				TwitchVodPlaylistManifestItem[] audioItems = GetAudioItems().ToArray();
+				TwitchPlaylistManifestItem[] videoItems = GetVideoItems().ToArray();
+				TwitchPlaylistManifestItem[] audioItems = GetAudioItems().ToArray();
 
 				Items.Clear();
 				Items.AddRange(videoItems);
@@ -174,7 +174,7 @@ namespace TwitchApiLib
 			return resultList;
 		}
 
-		private TwitchVodPlaylistManifestItem FindManifestItemWithFormatId(string formatId)
+		private TwitchPlaylistManifestItem FindManifestItemWithFormatId(string formatId)
 		{
 			return Items?.FirstOrDefault(item => item.FormatId == formatId);
 		}

@@ -28,7 +28,7 @@ namespace TwitchApiLib
 		public TwitchUser User { get; }
 		public Stream PreviewImageData { get; private set; }
 		public string PlaylistUrl { get; }
-		public TwitchVodPlaylist Playlist { get; private set; }
+		public TwitchPlaylist Playlist { get; private set; }
 		public string RawData { get; }
 		public TwitchVideoMetadata RawMetadata { get; }
 		public bool IsHighlight => VodType == TwitchVodType.Highlight;
@@ -40,7 +40,7 @@ namespace TwitchApiLib
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
 			string url, string thumbnailUrlTemplate, string viewable, ulong viewCount,
 			string language, TwitchVodType vodType, TwitchPlaybackAccessMode playbackAccessMode,
-			ulong streamId, TwitchUser user, string playlistUrl, TwitchVodPlaylist playlist,
+			ulong streamId, TwitchUser user, string playlistUrl, TwitchPlaylist playlist,
 			string rawData, TwitchVideoMetadata rawMetadata)
 		{
 			Id = id;
@@ -94,12 +94,12 @@ namespace TwitchApiLib
 			return Utils.GetVodPlaylistManifestUrl(this, out manifestUrl);
 		}
 
-		public TwitchVodPlaylistManifestResult GetPlaylistManifest()
+		public TwitchPlaylistManifestResult GetPlaylistManifest()
 		{
 			return Utils.GetVodPlaylistManifest(this);
 		}
 
-		public TwitchVodPlaylistResult GetPlaylist(string formatId = "chunked")
+		public TwitchPlaylistResult GetPlaylist(string formatId = "chunked")
 		{
 			int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
 			if (errorCode == 200)
@@ -109,12 +109,12 @@ namespace TwitchApiLib
 				d.Dispose();
 				if (errorCode == 200)
 				{
-					TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl);
-					return new TwitchVodPlaylistResult(playlist, 200);
+					TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl);
+					return new TwitchPlaylistResult(playlist, 200);
 				}
 			}
 
-			return new TwitchVodPlaylistResult(null, errorCode);
+			return new TwitchPlaylistResult(null, errorCode);
 		}
 
 		public int GetPlaybackAccessToken(out JObject token, out string errorMessage)
@@ -140,7 +140,7 @@ namespace TwitchApiLib
 
 		public bool UpdatePlaylist(string formatId, bool clearCurrentPlaylist = false)
 		{
-			TwitchVodPlaylistResult playlistResult = GetPlaylist(formatId);
+			TwitchPlaylistResult playlistResult = GetPlaylist(formatId);
 			if (clearCurrentPlaylist)
 			{
 				Playlist = playlistResult.ErrorCode == 200 ? playlistResult.Playlist : null;

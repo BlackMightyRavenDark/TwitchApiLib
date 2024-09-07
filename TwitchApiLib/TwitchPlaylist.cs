@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace TwitchApiLib
 {
-	public class TwitchVodPlaylist
+	public class TwitchPlaylist
 	{
 		public string PlaylistRaw { get; }
 		public string PlaylistUrl { get; }
@@ -16,7 +16,7 @@ namespace TwitchApiLib
 
 		private bool _isParsed = false;
 
-		public TwitchVodPlaylist(string playlistRaw, string playlistUrl)
+		public TwitchPlaylist(string playlistRaw, string playlistUrl)
 		{
 			PlaylistRaw = playlistRaw;
 			PlaylistUrl = playlistUrl;

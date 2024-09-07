@@ -109,7 +109,7 @@ namespace TwitchApiLib
 			return GetHlsPlaylistManifestUrl(out playlistManifestUrl, out _);
 		}
 
-		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest()
+		public TwitchPlaylistManifestResult GetHlsPlaylistManifest()
 		{
 			int errorCode = GetHlsPlaylistManifestUrl(out string manifestUrl);
 			if (errorCode == 200)
@@ -117,12 +117,12 @@ namespace TwitchApiLib
 				FileDownloader d = new FileDownloader() { Url = manifestUrl };
 				errorCode = d.DownloadString(out string manifestText);
 				d.Dispose();
-				TwitchVodPlaylistManifest playlistManifest = errorCode == 200 ?
-					new TwitchVodPlaylistManifest(manifestText) : null;
-				return new TwitchVodPlaylistManifestResult(playlistManifest, errorCode);
+				TwitchPlaylistManifest playlistManifest = errorCode == 200 ?
+					new TwitchPlaylistManifest(manifestText) : null;
+				return new TwitchPlaylistManifestResult(playlistManifest, errorCode);
 			}
 
-			return new TwitchVodPlaylistManifestResult(null, errorCode);
+			return new TwitchPlaylistManifestResult(null, errorCode);
 		}
 
 		public string FormatThumbnailTemplateUrl(ushort imageWidth, ushort imageHeight)
