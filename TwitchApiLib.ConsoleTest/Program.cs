@@ -62,14 +62,20 @@ namespace TwitchApiLib.ConsoleTest
 							}
 
 							Console.WriteLine($"VOD ID: {vodResult.Vod.Id}");
+							Console.WriteLine($"VOD type: {vodResult.Vod.VodType}");
 							Console.WriteLine($"Title: {vodResult.Vod.Title}");
 							Console.WriteLine($"Description: {vodResult.Vod.Description}");
 							Console.WriteLine($"Duration: {vodResult.Vod.Duration}");
 							if (vodResult.Vod.Game != null)
 							{
-								string game = vodResult.Vod.Game.IsKnown ?
-									$"{vodResult.Vod.Game.DisplayName} | {vodResult.Vod.Game.Id}" : "<not detected>";
-								Console.WriteLine($"Game: {game}");
+								string gameName = vodResult.Vod.Game.IsKnown ?
+									vodResult.Vod.Game.DisplayName : "<not detected>";
+								Console.WriteLine($"Game: {gameName}");
+								if (vodResult.Vod.Game.IsKnown)
+								{
+									Console.WriteLine($"Game ID: {vodResult.Vod.Game.Id}");
+								}
+
 							}
 							else
 							{
@@ -90,7 +96,6 @@ namespace TwitchApiLib.ConsoleTest
 							Console.WriteLine($"Viewable: {vodResult.Vod.Viewable}");
 							Console.WriteLine($"View count: {vodResult.Vod.ViewCount}");
 							Console.WriteLine($"Language: {vodResult.Vod.Language}");
-							Console.WriteLine($"VOD type: {vodResult.Vod.VodType}");
 							Console.WriteLine($"Is live: {vodResult.Vod.IsLive}");
 							if (vodResult.Vod.StreamId > 0UL)
 							{
