@@ -670,6 +670,12 @@ namespace TwitchApiLib
 			{
 				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
 				{
+					if (requestResult.ErrorCode != 200 && requestResult.ErrorCode != 206)
+					{
+						response = requestResult.ErrorMessage;
+						return requestResult.ErrorCode;
+					}
+
 					return requestResult.WebContent.ContentToString(out response);
 				}
 			}
