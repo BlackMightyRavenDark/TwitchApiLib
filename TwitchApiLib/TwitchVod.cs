@@ -108,7 +108,8 @@ namespace TwitchApiLib
 					int errorCode = Utils.DownloadString(manifestItemResult.PlaylistManifestItem.PlaylistUrl, out string playlistRaw);
 					if (errorCode == 200)
 					{
-						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, manifestItemResult.PlaylistManifestItem.PlaylistUrl);
+						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, null,
+							manifestItemResult.PlaylistManifestItem);
 						return new TwitchPlaylistResult(playlist, 200);
 					}
 				}
@@ -120,7 +121,7 @@ namespace TwitchApiLib
 					errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);
 					if (errorCode == 200)
 					{
-						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl);
+						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl, null);
 						return new TwitchPlaylistResult(playlist, 200);
 					}
 				}

@@ -9,6 +9,7 @@ namespace TwitchApiLib
 		public string PlaylistRaw { get; }
 		public string PlaylistUrl { get; }
 		public string StreamRootUrl { get; }
+		public TwitchPlaylistManifestItem Information { get; }
 		public List<TwitchVodChunk> ChunkList { get; }
 		public int Count => ChunkList.Count;
 		public TwitchVodMutedSegments MutedSegments => GetMutedSegments();
@@ -16,11 +17,36 @@ namespace TwitchApiLib
 
 		private bool _isParsed = false;
 
-		public TwitchPlaylist(string playlistRaw, string playlistUrl)
+		public TwitchPlaylist(string playlistRaw, string playlistUrl,
+			TwitchPlaylistManifestItem information)
 		{
 			PlaylistRaw = playlistRaw;
-			PlaylistUrl = playlistUrl;
-			StreamRootUrl = playlistUrl.Substring(0, playlistUrl.LastIndexOf('/') + 1);
+			if (information != null)
+			{
+				PlaylistUrl = !string.IsNullOrEmpty(information.PlaylistUrl) &&
+					!string.IsNullOrWhiteSpace(information.PlaylistUrl) ?
+					information.PlaylistUrl : playlistUrl;
+				if (!string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl))
+				{
+					int n = PlaylistUrl.LastIndexOf('/');
+					if (n > 0) { StreamRootUrl = PlaylistUrl.Substring(0, n + 1); }
+				}
+				else
+				{
+					StreamRootUrl = null;
+				}
+			}
+			else if (!string.IsNullOrEmpty(playlistUrl) && !string.IsNullOrWhiteSpace(playlistUrl))
+			{
+				PlaylistUrl = playlistUrl;
+				int n = playlistUrl.LastIndexOf("/");
+				if (n > 0)
+				{
+					StreamRootUrl = playlistUrl.Substring(0, n + 1);
+				}
+			}
+
+			Information = information;
 			ChunkList = new List<TwitchVodChunk>();
 		}
 

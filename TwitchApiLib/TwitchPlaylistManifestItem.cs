@@ -36,7 +36,7 @@ namespace TwitchApiLib
 			{
 				int errorCode = Utils.DownloadString(PlaylistUrl, out string response);
 				TwitchPlaylistResult playlistResult = errorCode == 200 ?
-					new TwitchPlaylistResult(new TwitchPlaylist(response, PlaylistUrl), 200) :
+					new TwitchPlaylistResult(new TwitchPlaylist(response, null, this), 200) :
 					new TwitchPlaylistResult(null, errorCode);
 				return playlistResult;
 			}
