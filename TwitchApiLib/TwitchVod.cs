@@ -105,9 +105,7 @@ namespace TwitchApiLib
 				TwitchPlaylistManifestItemResult manifestItemResult = Utils.GetVodPlaylistManifestItem(this, formatId);
 				if (manifestItemResult.ErrorCode == 200)
 				{
-					FileDownloader d = new FileDownloader() { Url = manifestItemResult.PlaylistManifestItem.PlaylistUrl };
-					int errorCode = d.DownloadString(out string playlistRaw);
-					d.Dispose();
+					int errorCode = Utils.DownloadString(manifestItemResult.PlaylistManifestItem.PlaylistUrl, out string playlistRaw);
 					if (errorCode == 200)
 					{
 						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, manifestItemResult.PlaylistManifestItem.PlaylistUrl);
@@ -119,9 +117,7 @@ namespace TwitchApiLib
 				int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
 				if (errorCode == 200)
 				{
-					FileDownloader d = new FileDownloader() { Url = playlistUrl };
-					errorCode = d.DownloadString(out string playlistRaw);
-					d.Dispose();
+					errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);
 					if (errorCode == 200)
 					{
 						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl);

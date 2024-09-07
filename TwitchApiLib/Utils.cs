@@ -471,8 +471,7 @@ namespace TwitchApiLib
 			int errorCode = GetVodPlaylistManifestUrl(vodId, false, out string playlistManifestUrl);
 			if (errorCode == 200)
 			{
-				FileDownloader d = new FileDownloader() { Url = playlistManifestUrl };
-				errorCode = d.DownloadString(out string manifestRaw);
+				errorCode = DownloadString(playlistManifestUrl, out string manifestRaw);
 				if (errorCode == 200)
 				{
 					TwitchPlaylistManifest playlistManifest = new TwitchPlaylistManifest(manifestRaw);
@@ -512,7 +511,7 @@ namespace TwitchApiLib
 			return new TwitchPlaylistManifestItemResult(null, manifestResult.ErrorCode);
 		}
 
-        public static void ExtractVodSpecialDataFromThumbnailUrl(string thumbnailUrl,
+		public static void ExtractVodSpecialDataFromThumbnailUrl(string thumbnailUrl,
 			out string specialId, out string serverId)
 		{
 			if (string.IsNullOrEmpty(thumbnailUrl) || string.IsNullOrWhiteSpace(thumbnailUrl))
@@ -726,6 +725,19 @@ namespace TwitchApiLib
 		public static int HttpPost(string url, out string response)
 		{
 			return HttpPost(url, null, out response);
+		}
+
+		internal static int DownloadString(string url, NameValueCollection headers, out string responseString)
+		{
+			FileDownloader d = new FileDownloader() { Url = url, Headers = headers };
+			int errorCode = d.DownloadString(out responseString);
+			d.Dispose();
+			return errorCode;
+		}
+
+		internal static int DownloadString(string url, out string responseString)
+		{
+			return DownloadString(url, null, out responseString);
 		}
 
 		internal static JObject TryParseJson(string jsonString, out string errorMessage)

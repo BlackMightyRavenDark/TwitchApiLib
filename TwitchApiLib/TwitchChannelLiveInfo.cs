@@ -114,9 +114,7 @@ namespace TwitchApiLib
 			int errorCode = GetHlsPlaylistManifestUrl(out string manifestUrl);
 			if (errorCode == 200)
 			{
-				FileDownloader d = new FileDownloader() { Url = manifestUrl };
-				errorCode = d.DownloadString(out string manifestText);
-				d.Dispose();
+				errorCode = Utils.DownloadString(manifestUrl, out string manifestText);
 				TwitchPlaylistManifest playlistManifest = errorCode == 200 ?
 					new TwitchPlaylistManifest(manifestText) : null;
 				return new TwitchPlaylistManifestResult(playlistManifest, errorCode);
