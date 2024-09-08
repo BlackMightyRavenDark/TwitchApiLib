@@ -46,11 +46,17 @@ namespace TwitchApiLib
 
 		public override string ToString()
 		{
-			string t = IsAudioOnly() ? string.Empty :
-				$"Resolution: {ResolutionWidth}x{ResolutionHeight}, {FrameRate} fps{Environment.NewLine}";
+			string t = $"Format ID: {FormatId}{Environment.NewLine}";
+			if (!IsAudioOnly())
+			{
+				t += $"Resolution: {ResolutionWidth}x{ResolutionHeight}{Environment.NewLine}";
+				if (FrameRate > 0)
+				{
+					t += $"Frame rate: {FrameRate} fps{Environment.NewLine}";
+				}
+			}
 			t += $"Bandwidth: {Bandwidth}{Environment.NewLine}" +
 				$"Codecs: {Codecs}{Environment.NewLine}" +
-				$"Format ID: {FormatId}{Environment.NewLine}" +
 				$"Playlist URL: {PlaylistUrl}{Environment.NewLine}";
 			return t;
 		}
