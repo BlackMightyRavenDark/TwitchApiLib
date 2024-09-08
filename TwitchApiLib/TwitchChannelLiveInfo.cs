@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using MultiThreadedDownloaderLib;
 using Newtonsoft.Json.Linq;
 
 namespace TwitchApiLib
