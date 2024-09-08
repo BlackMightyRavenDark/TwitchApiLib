@@ -99,8 +99,9 @@ namespace TwitchApiLib
 			return Utils.GetVodPlaylistManifest(this);
 		}
 
-		public TwitchPlaylistResult GetPlaylist(string formatId = "chunked")
+		public TwitchPlaylistResult GetPlaylist(string formatId, bool fastMode)
 		{
+			if (!fastMode)
 			{
 				TwitchPlaylistManifestItemResult manifestItemResult = Utils.GetVodPlaylistManifestItem(this, formatId);
 				if (manifestItemResult.ErrorCode == 200)
@@ -128,6 +129,21 @@ namespace TwitchApiLib
 
 				return new TwitchPlaylistResult(null, errorCode);
 			}
+		}
+
+		public TwitchPlaylistResult GetPlaylist(string formatId)
+		{
+			return GetPlaylist(formatId, false);
+		}
+
+		public TwitchPlaylistResult GetPlaylist(bool fastMode)
+		{
+			return GetPlaylist("chunked", fastMode);
+		}
+
+		public TwitchPlaylistResult GetPlaylist()
+		{
+			return GetPlaylist("chunked", false);
 		}
 
 		public int GetPlaybackAccessToken(out JObject token, out string errorMessage)
