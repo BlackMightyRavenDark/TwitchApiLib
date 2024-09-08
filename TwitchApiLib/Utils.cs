@@ -395,44 +395,35 @@ namespace TwitchApiLib
 				new TwitchChannelLiveInfoResult(null, userResult.ErrorCode);
 		}
 
-		private static int GetVodPlaybackAccessToken(string vodId, out JObject token, out string errorText)
+		private static int GetVodPlaybackAccessToken(string vodId,
+			out ITwitchPlaybackAccessToken token, out string errorText)
 		{
 			JObject body = TwitchApiGql.GeneratePlaybackAccessTokenRequestBody(vodId, string.Empty);
 			int errorCode = HttpPost(TwitchApiGql.TWITCH_GQL_API_URL, body.ToString(), out string response);
 			if (errorCode == 200)
 			{
-				JObject json = TryParseJson(response);
-				if (json != null)
-				{
-					token = json.Value<JObject>("data")?.Value<JObject>("videoPlaybackAccessToken");
-					if (token != null)
-					{
-						errorText = null;
-						return 200;
-					}
-				}
-
-				token = null;
-				errorText = "Token not found";
-				return 204;
+				token = new TwitchVideoPlaybackAccessToken(response, 200);
+				errorText = null;
+				return 200;
 			}
 
 			token = null;
-			errorText = null;
+			errorText = response;
 			return errorCode;
 		}
 
-		private static int GetVodPlaybackAccessToken(string vodId, out JObject token)
+		private static int GetVodPlaybackAccessToken(string vodId, out ITwitchPlaybackAccessToken token)
 		{
 			return GetVodPlaybackAccessToken(vodId, out token, out _);
 		}
 
-		public static int GetVodPlaybackAccessToken(ulong vodId, out JObject token, out string errorText)
+		public static int GetVodPlaybackAccessToken(ulong vodId,
+			out ITwitchPlaybackAccessToken token, out string errorText)
 		{
 			return GetVodPlaybackAccessToken(vodId.ToString(), out token, out errorText);
 		}
 
-		public static int GetVodPlaybackAccessToken(ulong vodId, out JObject token)
+		public static int GetVodPlaybackAccessToken(ulong vodId, out ITwitchPlaybackAccessToken token)
 		{
 			return GetVodPlaybackAccessToken(vodId, out token, out _);
 		}
@@ -445,8 +436,8 @@ namespace TwitchApiLib
 				return 403;
 			}
 
-			int errorCode = GetVodPlaybackAccessToken(vodId, out JObject jToken);
-			playListManifestUrl = errorCode == 200 ? TwitchApiGql.GenerateVodPlaylistManifestUrl(vodId.ToString(), jToken) : null;
+			int errorCode = GetVodPlaybackAccessToken(vodId, out ITwitchPlaybackAccessToken token);
+			playListManifestUrl = errorCode == 200 ? TwitchApiGql.GenerateVodPlaylistManifestUrl(vodId.ToString(), token) : null;
 
 			return errorCode;
 		}

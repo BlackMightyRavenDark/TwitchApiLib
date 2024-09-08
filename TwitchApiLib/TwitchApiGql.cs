@@ -194,6 +194,13 @@ namespace TwitchApiLib
 			return url;
 		}
 
+		public static string GenerateVodPlaylistManifestUrl(string vodId,
+			ITwitchPlaybackAccessToken vodPlaybackAccessToken)
+		{
+			JObject jsonToken = vodPlaybackAccessToken.GetToken();
+			return jsonToken != null ? GenerateVodPlaylistManifestUrl(vodId, jsonToken) : null;
+		}
+
 		public static ITwitchPlaybackAccessToken GetChannelPlaybackAccessToken(
 			string channelName, Guid deviceId)
 		{

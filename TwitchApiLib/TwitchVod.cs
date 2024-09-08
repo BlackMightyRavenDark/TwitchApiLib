@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using MultiThreadedDownloaderLib;
-using Newtonsoft.Json.Linq;
 using static TwitchApiLib.TwitchApi;
 
 namespace TwitchApiLib
@@ -146,12 +145,12 @@ namespace TwitchApiLib
 			return GetPlaylist("chunked", false);
 		}
 
-		public int GetPlaybackAccessToken(out JObject token, out string errorMessage)
+		public int GetPlaybackAccessToken(out ITwitchPlaybackAccessToken token, out string errorMessage)
 		{
 			return Utils.GetVodPlaybackAccessToken(Id, out token, out errorMessage);
 		}
 
-		public int GetPlaybackAccessToken(out JObject token)
+		public int GetPlaybackAccessToken(out ITwitchPlaybackAccessToken token)
 		{
 			return GetPlaybackAccessToken(out token, out _);
 		}
