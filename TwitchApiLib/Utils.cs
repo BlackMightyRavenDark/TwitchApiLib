@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net;
+using System.Text;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 using static TwitchApiLib.TwitchApi;
@@ -673,17 +675,20 @@ namespace TwitchApiLib
 		}
 
 		public static int HttpPost(string url, string body,
-			NameValueCollection headers, out string response)
+			WebHeaderCollection headers, out string response)
 		{
 			try
 			{
-				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
+				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, Encoding.UTF8, headers))
 				{
 					if (requestResult.ErrorCode != 200 && requestResult.ErrorCode != 206)
 					{
 						response = requestResult.ErrorMessage;
 						return requestResult.ErrorCode;
 					}
+
+					int errorCode = requestResult.GetContent(out response);
+					if (errorCode != 200) { return errorCode; }
 
 					return requestResult.WebContent.ContentToString(out response);
 				}
@@ -698,11 +703,11 @@ namespace TwitchApiLib
 
 		public static int HttpPost(string url, string body, out string response)
 		{
-			NameValueCollection headers = null;
+			WebHeaderCollection headers = null;
 			if (!string.IsNullOrEmpty(body))
 			{
 				string userAgent = GetUserAgent();
-				headers = new NameValueCollection
+				headers = new WebHeaderCollection
 				{
 					{ "Content-Type", "application/json" },
 					{ "Client-ID", TwitchApiGql.TWITCH_GQL_CLIENT_ID },
@@ -718,9 +723,9 @@ namespace TwitchApiLib
 			return HttpPost(url, null, out response);
 		}
 
-		internal static int DownloadString(string url, NameValueCollection headers, out string responseString)
+		internal static int DownloadString(string url, WebHeaderCollection headers, out string responseString)
 		{
-			FileDownloader d = new FileDownloader() { Url = url, Headers = headers };
+			FileDownloader d = new FileDownloader() { Url = url, Headers = headers, SkipHeaderRequest = true };
 			int errorCode = d.DownloadString(out responseString);
 			d.Dispose();
 			return errorCode;

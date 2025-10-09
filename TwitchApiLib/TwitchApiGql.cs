@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
 using static TwitchApiLib.TwitchApi;
@@ -215,7 +216,7 @@ namespace TwitchApiLib
 
 			string userAgent = GetUserAgent();
 
-			NameValueCollection headers = new NameValueCollection()
+			WebHeaderCollection headers = new WebHeaderCollection()
 			{
 				{ "User-Agent", userAgent },
 				{ "Host", "gql.twitch.tv" },
