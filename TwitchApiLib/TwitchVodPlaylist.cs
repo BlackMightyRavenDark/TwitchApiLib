@@ -4,12 +4,12 @@ using System.Globalization;
 
 namespace TwitchApiLib
 {
-	public class TwitchPlaylist
+	public class TwitchVodPlaylist
 	{
 		public string PlaylistRaw { get; }
 		public string PlaylistUrl { get; }
 		public string StreamRootUrl { get; }
-		public TwitchPlaylistManifestItem Information { get; }
+		public TwitchVodPlaylistManifestItem Information { get; }
 		public List<TwitchVodChunk> ChunkList { get; }
 		public int Count => ChunkList.Count;
 		public TwitchVodMutedSegments MutedSegments => GetMutedSegments();
@@ -17,8 +17,8 @@ namespace TwitchApiLib
 
 		private bool _isParsed = false;
 
-		public TwitchPlaylist(string playlistRaw, string playlistUrl,
-			TwitchPlaylistManifestItem information)
+		public TwitchVodPlaylist(string playlistRaw, string playlistUrl,
+			TwitchVodPlaylistManifestItem information)
 		{
 			PlaylistRaw = playlistRaw;
 			if (information != null)

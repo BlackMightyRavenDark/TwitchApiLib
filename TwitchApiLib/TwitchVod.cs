@@ -27,7 +27,7 @@ namespace TwitchApiLib
 		public TwitchUser User { get; }
 		public Stream PreviewImageData { get; private set; }
 		public string PlaylistUrl { get; }
-		public TwitchPlaylist Playlist { get; private set; }
+		public TwitchVodPlaylist Playlist { get; private set; }
 		public string RawData { get; }
 		public TwitchVideoMetadata RawMetadata { get; }
 		public bool IsHighlight => VodType == TwitchVodType.Highlight;
@@ -39,7 +39,7 @@ namespace TwitchApiLib
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
 			string url, string thumbnailUrlTemplate, string viewable, ulong viewCount,
 			string language, TwitchVodType vodType, TwitchPlaybackAccessMode playbackAccessMode,
-			ulong streamId, TwitchUser user, string playlistUrl, TwitchPlaylist playlist,
+			ulong streamId, TwitchUser user, string playlistUrl, TwitchVodPlaylist playlist,
 			string rawData, TwitchVideoMetadata rawMetadata)
 		{
 			Id = id;
@@ -93,24 +93,24 @@ namespace TwitchApiLib
 			return Utils.GetVodPlaylistManifestUrl(this, out manifestUrl);
 		}
 
-		public TwitchPlaylistManifestResult GetPlaylistManifest()
+		public TwitchVodPlaylistManifestResult GetPlaylistManifest()
 		{
 			return Utils.GetVodPlaylistManifest(this);
 		}
 
-		public TwitchPlaylistResult GetPlaylist(string formatId, bool fastMode)
+		public TwitchVodPlaylistResult GetPlaylist(string formatId, bool fastMode)
 		{
 			if (!fastMode)
 			{
-				TwitchPlaylistManifestItemResult manifestItemResult = Utils.GetVodPlaylistManifestItem(this, formatId);
+				TwitchVodPlaylistManifestItemResult manifestItemResult = Utils.GetVodPlaylistManifestItem(this, formatId);
 				if (manifestItemResult.ErrorCode == 200)
 				{
 					int errorCode = Utils.DownloadString(manifestItemResult.PlaylistManifestItem.PlaylistUrl, out string playlistRaw);
 					if (errorCode == 200)
 					{
-						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, null,
+						TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, null,
 							manifestItemResult.PlaylistManifestItem);
-						return new TwitchPlaylistResult(playlist, 200);
+						return new TwitchVodPlaylistResult(playlist, 200);
 					}
 				}
 			}
@@ -121,26 +121,26 @@ namespace TwitchApiLib
 					errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);
 					if (errorCode == 200)
 					{
-						TwitchPlaylist playlist = new TwitchPlaylist(playlistRaw, playlistUrl, null);
-						return new TwitchPlaylistResult(playlist, 200);
+						TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl, null);
+						return new TwitchVodPlaylistResult(playlist, 200);
 					}
 				}
 
-				return new TwitchPlaylistResult(null, errorCode);
+				return new TwitchVodPlaylistResult(null, errorCode);
 			}
 		}
 
-		public TwitchPlaylistResult GetPlaylist(string formatId)
+		public TwitchVodPlaylistResult GetPlaylist(string formatId)
 		{
 			return GetPlaylist(formatId, false);
 		}
 
-		public TwitchPlaylistResult GetPlaylist(bool fastMode)
+		public TwitchVodPlaylistResult GetPlaylist(bool fastMode)
 		{
 			return GetPlaylist("chunked", fastMode);
 		}
 
-		public TwitchPlaylistResult GetPlaylist()
+		public TwitchVodPlaylistResult GetPlaylist()
 		{
 			return GetPlaylist("chunked", false);
 		}
@@ -168,7 +168,7 @@ namespace TwitchApiLib
 
 		public bool UpdatePlaylist(string formatId, bool clearCurrentPlaylist = false)
 		{
-			TwitchPlaylistResult playlistResult = GetPlaylist(formatId);
+			TwitchVodPlaylistResult playlistResult = GetPlaylist(formatId);
 			if (clearCurrentPlaylist)
 			{
 				Playlist = playlistResult.ErrorCode == 200 ? playlistResult.Playlist : null;

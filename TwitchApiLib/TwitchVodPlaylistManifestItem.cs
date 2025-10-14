@@ -2,7 +2,7 @@
 
 namespace TwitchApiLib
 {
-	public class TwitchPlaylistManifestItem
+	public class TwitchVodPlaylistManifestItem
 	{
 		public int ResolutionWidth { get; }
 		public int ResolutionHeight { get; }
@@ -12,7 +12,7 @@ namespace TwitchApiLib
 		public string FormatId { get; }
 		public string PlaylistUrl { get; }
 
-		public TwitchPlaylistManifestItem(int resolutionWidth, int resolutionHeight, int bandwidth,
+		public TwitchVodPlaylistManifestItem(int resolutionWidth, int resolutionHeight, int bandwidth,
 			int frameRate, string codecs, string formatId, string playlistUrl)
 		{
 			ResolutionWidth = resolutionWidth;
@@ -29,18 +29,18 @@ namespace TwitchApiLib
 			return !string.IsNullOrEmpty(FormatId) && FormatId.Contains("audio_only");
 		}
 
-		public TwitchPlaylistResult GetPlaylist()
+		public TwitchVodPlaylistResult GetPlaylist()
 		{
 			if (!string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl))
 			{
 				int errorCode = Utils.DownloadString(PlaylistUrl, out string response);
-				TwitchPlaylistResult playlistResult = errorCode == 200 ?
-					new TwitchPlaylistResult(new TwitchPlaylist(response, null, this), 200) :
-					new TwitchPlaylistResult(null, errorCode);
+				TwitchVodPlaylistResult playlistResult = errorCode == 200 ?
+					new TwitchVodPlaylistResult(new TwitchVodPlaylist(response, null, this), 200) :
+					new TwitchVodPlaylistResult(null, errorCode);
 				return playlistResult;
 			}
 
-			return new TwitchPlaylistResult(null, 400);
+			return new TwitchVodPlaylistResult(null, 400);
 		}
 
 		public override string ToString()
