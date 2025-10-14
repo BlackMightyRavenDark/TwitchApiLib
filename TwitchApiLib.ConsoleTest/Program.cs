@@ -77,7 +77,6 @@ namespace TwitchApiLib.ConsoleTest
 								{
 									Console.WriteLine($"Game ID: {vodResult.Vod.Game.Id}");
 								}
-
 							}
 							else
 							{
@@ -106,7 +105,8 @@ namespace TwitchApiLib.ConsoleTest
 							/*Console.WriteLine($"User ID: {vodResult.Vod.User?.Id}");
 							Console.WriteLine($"User login: {vodResult.Vod.User?.Login}");
 							Console.WriteLine($"User name: {vodResult.Vod.User?.DisplayName}");*/
-							Console.WriteLine($"Playlist URL: {vodResult.Vod.PlaylistUrl}");
+							string playlistUrl = vodResult.Vod.Playlist?.PlaylistUrl ?? "<Not found>";
+							Console.WriteLine($"Playlist URL: {playlistUrl}");
 							Console.WriteLine();
 						}
 					}

@@ -26,20 +26,19 @@ namespace TwitchApiLib
 		public ulong StreamId { get; }
 		public TwitchUser User { get; }
 		public Stream PreviewImageData { get; private set; }
-		public string PlaylistUrl { get; }
-		public TwitchVodPlaylist Playlist { get; private set; }
+		public TwitchVodPlaylist Playlist => PlaylistManifest != null && PlaylistManifest.Count > 0 ? PlaylistManifest[0].Playlist : null;
+		public TwitchVodPlaylistManifest PlaylistManifest { get; private set; }
 		public string RawData { get; }
 		public TwitchVideoMetadata RawMetadata { get; }
 		public bool IsHighlight => VodType == TwitchVodType.Highlight;
 		public bool IsUpload => VodType == TwitchVodType.Upload;
 		public bool IsSubscribersOnly => PlaybackAccessMode == TwitchPlaybackAccessMode.SubscribersOnly;
-		public bool IsPlaylistUrlExists { get; }
 
 		public TwitchVod(ulong id, string title, string description, TimeSpan duration,
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
 			string url, string thumbnailUrlTemplate, string viewable, ulong viewCount,
 			string language, TwitchVodType vodType, TwitchPlaybackAccessMode playbackAccessMode,
-			ulong streamId, TwitchUser user, string playlistUrl, TwitchVodPlaylist playlist,
+			ulong streamId, TwitchUser user, string playlistUrl,
 			string rawData, TwitchVideoMetadata rawMetadata)
 		{
 			Id = id;
@@ -60,11 +59,8 @@ namespace TwitchApiLib
 			IsLive = GetIsLive();
 			StreamId = streamId;
 			User = user;
-			PlaylistUrl = playlistUrl;
-			Playlist = playlist;
 			RawData = rawData;
 			RawMetadata = rawMetadata;
-			IsPlaylistUrlExists = !string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl);
 		}
 
 		public void Dispose()
@@ -98,51 +94,20 @@ namespace TwitchApiLib
 			return Utils.GetVodPlaylistManifest(this);
 		}
 
-		public TwitchVodPlaylistResult GetPlaylist(string formatId, bool fastMode)
-		{
-			if (!fastMode)
-			{
-				TwitchVodPlaylistManifestItemResult manifestItemResult = Utils.GetVodPlaylistManifestItem(this, formatId);
-				if (manifestItemResult.ErrorCode == 200)
-				{
-					int errorCode = Utils.DownloadString(manifestItemResult.PlaylistManifestItem.PlaylistUrl, out string playlistRaw);
-					if (errorCode == 200)
-					{
-						TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, null,
-							manifestItemResult.PlaylistManifestItem);
-						return new TwitchVodPlaylistResult(playlist, 200);
-					}
-				}
-			}
-			{
-				int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
-				if (errorCode == 200)
-				{
-					errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);
-					if (errorCode == 200)
-					{
-						TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl, null);
-						return new TwitchVodPlaylistResult(playlist, 200);
-					}
-				}
-
-				return new TwitchVodPlaylistResult(null, errorCode);
-			}
-		}
-
 		public TwitchVodPlaylistResult GetPlaylist(string formatId)
 		{
-			return GetPlaylist(formatId, false);
-		}
+			int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
+			if (errorCode == 200)
+			{
+				errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);
+				if (errorCode == 200)
+				{
+					TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl, null);
+					return new TwitchVodPlaylistResult(playlist, 200);
+				}
+			}
 
-		public TwitchVodPlaylistResult GetPlaylist(bool fastMode)
-		{
-			return GetPlaylist("chunked", fastMode);
-		}
-
-		public TwitchVodPlaylistResult GetPlaylist()
-		{
-			return GetPlaylist("chunked", false);
+			return new TwitchVodPlaylistResult(null, errorCode);
 		}
 
 		public int GetPlaybackAccessToken(out ITwitchPlaybackAccessToken token, out string errorMessage)
@@ -155,43 +120,19 @@ namespace TwitchApiLib
 			return GetPlaybackAccessToken(out token, out _);
 		}
 
-		public bool ClearPlaylist()
+		public int UpdatePlaylistManifest(bool autosort = true)
 		{
-			if (Playlist != null)
+			TwitchVodPlaylistManifestResult playlistManifestResult = GetPlaylistManifest();
+			if (playlistManifestResult.ErrorCode == 200)
 			{
-				Playlist.ChunkList.Clear();
-				return true;
+				if (autosort && playlistManifestResult.PlaylistManifest.Parse() > 1)
+				{
+					playlistManifestResult.PlaylistManifest.SortByBandwidth();
+				}
+				PlaylistManifest = playlistManifestResult.PlaylistManifest;
 			}
 
-			return false;
-		}
-
-		public bool UpdatePlaylist(string formatId, bool clearCurrentPlaylist = false)
-		{
-			TwitchVodPlaylistResult playlistResult = GetPlaylist(formatId);
-			if (clearCurrentPlaylist)
-			{
-				Playlist = playlistResult.ErrorCode == 200 ? playlistResult.Playlist : null;
-				return Playlist != null;
-			}
-
-			if (playlistResult.ErrorCode == 200)
-			{
-				Playlist = playlistResult.Playlist;
-				return true;
-			}
-
-			return false;
-		}
-
-		public bool UpdatePlaylist(bool clearCurrentPlaylist)
-		{
-			return UpdatePlaylist("chunked", clearCurrentPlaylist);
-		}
-
-		public bool UpdatePlaylist()
-		{
-			return UpdatePlaylist(false);
+			return playlistManifestResult.ErrorCode;
 		}
 
 		public void GetSpecialData(out string specialId, out string serverId)
@@ -208,9 +149,7 @@ namespace TwitchApiLib
 
 		public TwitchVodMutedSegments GetMutedSegments(bool showChunkCount = false)
 		{
-			if (UpdatePlaylist()) { return Playlist.GetMutedSegments(showChunkCount); }
-
-			return null;
+			return Playlist?.GetMutedSegments(showChunkCount);
 		}
 
 		public int RetrievePreviewImage(ushort width, ushort height)

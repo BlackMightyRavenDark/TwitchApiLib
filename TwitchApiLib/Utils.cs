@@ -222,14 +222,16 @@ namespace TwitchApiLib
 				}
 
 				TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetVodPlaybackAccessMode(vodId.ToString(), out _);
-				ExtractVodSpecialDataFromThumbnailUrl(thumbnailTemplateUrl, out string specialId, out string serverId);
-				_ = GetVodPlaylistUrl(serverId, specialId, "chunked", vodId.ToString(), vodType,
-					playbackAccessMode == TwitchPlaybackAccessMode.SubscribersOnly, out string playlistUrl);
 
 				TwitchVod vod = new TwitchVod(vodId, title, description, duration, game, creationDate,
 					publishedDate, deletionDeletion, url, thumbnailTemplateUrl, viewable, viewCount,
 					language, vodType, playbackAccessMode, streamId, twitchUserResult.User,
-					playlistUrl, null, vodInfo.ToString(), videoMetadataResult.Metadata);
+					null, vodInfo.ToString(), videoMetadataResult.Metadata);
+				if (vod.UpdatePlaylistManifest() == 200 && vod.PlaylistManifest.Count > 0)
+				{
+					vod.PlaylistManifest[0].UpdatePlaylist();
+				}
+
 				return new TwitchVodResult(vod, 200, null, vodInfo.ToString());
 			}
 			catch (Exception ex)
@@ -529,28 +531,8 @@ namespace TwitchApiLib
 		}
 
 		public static int GetVodPlaylistUrl(string serverId, string vodSpecialId, string formatId,
-			string vodId, TwitchVodType vodType, bool isSubscribersOnly, out string playlistUrl)
+			string vodId, TwitchVodType vodType, out string playlistUrl)
 		{
-			if (!isSubscribersOnly)
-			{
-				TwitchVodPlaylistManifestResult playlistManifestResult = GetVodPlaylistManifest(vodId, false);
-				if (playlistManifestResult.ErrorCode == 200 && playlistManifestResult.PlaylistManifest.Parse() > 0)
-				{
-					TwitchVodPlaylistManifestItem manifestItem = playlistManifestResult.PlaylistManifest[formatId];
-					if (manifestItem != null)
-					{
-						playlistUrl = manifestItem.PlaylistUrl;
-						return 200;
-					}
-					else
-					{
-						playlistManifestResult.PlaylistManifest.SortByBandwidth();
-						playlistUrl = playlistManifestResult.PlaylistManifest[0].PlaylistUrl;
-						return 200;
-					}
-				}
-			}
-
 			if (string.IsNullOrEmpty(serverId) || string.IsNullOrWhiteSpace(serverId) ||
 				string.IsNullOrEmpty(vodSpecialId) || string.IsNullOrWhiteSpace(vodSpecialId) ||
 				string.IsNullOrEmpty(formatId) || string.IsNullOrWhiteSpace(formatId))
@@ -584,14 +566,13 @@ namespace TwitchApiLib
 
 		public static int GetVodPlaylistUrl(string serverId, string vodSpecialId, string formatId, out string playlistUrl)
 		{
-			return GetVodPlaylistUrl(serverId, vodSpecialId, formatId, null, TwitchVodType.Archive, false, out playlistUrl);
+			return GetVodPlaylistUrl(serverId, vodSpecialId, formatId, null, TwitchVodType.Archive, out playlistUrl);
 		}
 
 		public static int GetVodPlaylistUrl(TwitchVod vod, string formatId, out string playlistUrl)
 		{
 			vod.GetSpecialData(out string specialId, out string serverId);
-			return GetVodPlaylistUrl(serverId, specialId, formatId, vod.Id.ToString(),
-				vod.VodType, vod.IsSubscribersOnly, out playlistUrl);
+			return GetVodPlaylistUrl(serverId, specialId, formatId, vod.Id.ToString(), vod.VodType, out playlistUrl);
 		}
 
 		public static int GetVodPlaylistUrl(TwitchVod vod, out string playlistUrl)

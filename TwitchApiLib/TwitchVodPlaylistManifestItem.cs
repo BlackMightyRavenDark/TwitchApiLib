@@ -11,6 +11,7 @@ namespace TwitchApiLib
 		public string Codecs { get; }
 		public string FormatId { get; }
 		public string PlaylistUrl { get; }
+		public TwitchVodPlaylist Playlist { get; set; }
 
 		public TwitchVodPlaylistManifestItem(int resolutionWidth, int resolutionHeight, int bandwidth,
 			int frameRate, string codecs, string formatId, string playlistUrl)
@@ -41,6 +42,18 @@ namespace TwitchApiLib
 			}
 
 			return new TwitchVodPlaylistResult(null, 400);
+		}
+
+		public int UpdatePlaylist()
+		{
+			int errorCode = Utils.DownloadString(PlaylistUrl, out string playlistRawData);
+			if (errorCode == 200)
+			{
+				Playlist = new TwitchVodPlaylist(playlistRawData, PlaylistUrl, this);
+				Playlist.Parse();
+			}
+
+			return errorCode;
 		}
 
 		public override string ToString()
