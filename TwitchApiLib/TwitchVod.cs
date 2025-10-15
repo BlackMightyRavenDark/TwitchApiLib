@@ -79,7 +79,7 @@ namespace TwitchApiLib
 				ThumbnailUrlTemplate.Contains("_404/404_processing_");
 		}
 
-		public int GetPlaylistUrl(out string playlistUrl, string formatId = "chunked")
+		public int GeneratePlaylistUrl(out string playlistUrl, string formatId = "chunked")
 		{
 			return Utils.GenerateVodPlaylistUrl(this, formatId, out playlistUrl);
 		}
@@ -96,7 +96,7 @@ namespace TwitchApiLib
 
 		public TwitchVodPlaylistResult GetPlaylist(string formatId)
 		{
-			int errorCode = GetPlaylistUrl(out string playlistUrl, formatId);
+			int errorCode = GeneratePlaylistUrl(out string playlistUrl, formatId);
 			if (errorCode == 200)
 			{
 				errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);

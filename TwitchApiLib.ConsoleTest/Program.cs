@@ -117,7 +117,7 @@ namespace TwitchApiLib.ConsoleTest
 								}
 								if (!vodResult.Vod.PlaylistManifest.HasBestQuality)
 								{
-									if (vodResult.Vod.GetPlaylistUrl(out string url) == 200)
+									if (vodResult.Vod.GeneratePlaylistUrl(out string url) == 200)
 									{
 										Console.WriteLine($"The best quality | {url}");
 									}
