@@ -11,7 +11,7 @@ namespace TwitchApiLib
 
 		public const string TWITCH_CLIENT_ID = "gs7pui3law5lsi69yzi9qzyaqvlcsy";
 
-		private static string _userAgent = "Mozilla/firefox";
+		private static string _userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0";
 
 		public enum TwitchVodType { Undefined, Archive, Highlight, Upload, Unknown }
 		public enum TwitchBroadcasterType { Undefined, Affiliate, Partner, Unknown }
