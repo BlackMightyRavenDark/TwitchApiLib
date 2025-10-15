@@ -115,6 +115,13 @@ namespace TwitchApiLib.ConsoleTest
 									string t = !item.IsAudioOnly() ? $"{item.ResolutionWidth}x{item.ResolutionHeight} | {item.FrameRate} fps" : item.FormatId;
 									Console.WriteLine($"{t} | {url}");
 								}
+								if (!vodResult.Vod.PlaylistManifest.HasBestQuality)
+								{
+									if (vodResult.Vod.GetPlaylistUrl(out string url) == 200)
+									{
+										Console.WriteLine($"The best quality | {url}");
+									}
+								}
 							}
 							else
 							{

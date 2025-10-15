@@ -11,6 +11,7 @@ namespace TwitchApiLib
 		public string ManifestRaw { get; }
 		public List<TwitchVodPlaylistManifestItem> Items { get; }
 		public int Count => Items != null ? Items.Count : 0;
+		public bool HasBestQuality => GetHasBestQuality();
 		public TwitchVodPlaylistManifestItem this[string formatId] => FindManifestItemWithFormatId(formatId);
 		public TwitchVodPlaylistManifestItem this[int id] => Items[id];
 
@@ -103,6 +104,11 @@ namespace TwitchApiLib
 		public IEnumerable<TwitchVodPlaylistManifestItem> GetAudioItems()
 		{
 			return Items.Where(item => item.IsAudioOnly());
+		}
+
+		private bool GetHasBestQuality()
+		{
+			return Items != null && Items.Any(item => string.Equals(item.FormatId, "chunked", StringComparison.OrdinalIgnoreCase));
 		}
 
 		public void SortByBandwidth()
