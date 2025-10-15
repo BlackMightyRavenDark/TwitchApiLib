@@ -571,7 +571,7 @@ namespace TwitchApiLib
 
 		public static int GenerateVodPlaylistUrl(TwitchVod vod, string formatId, out string playlistUrl)
 		{
-			vod.GetSpecialData(out string specialId, out string serverId);
+			vod.ExtractSpecialData(out string specialId, out string serverId);
 			return GenerateVodPlaylistUrl(serverId, specialId, formatId, vod.Id.ToString(), vod.VodType, out playlistUrl);
 		}
 

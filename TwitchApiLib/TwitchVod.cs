@@ -135,7 +135,7 @@ namespace TwitchApiLib
 			return playlistManifestResult.ErrorCode;
 		}
 
-		public void GetSpecialData(out string specialId, out string serverId)
+		public void ExtractSpecialData(out string specialId, out string serverId)
 		{
 			Utils.ExtractVodSpecialDataFromThumbnailUrl(ThumbnailUrlTemplate, out specialId, out serverId);
 		}
