@@ -81,7 +81,7 @@ namespace TwitchApiLib
 
 		public int GetPlaylistUrl(out string playlistUrl, string formatId = "chunked")
 		{
-			return Utils.GetVodPlaylistUrl(this, formatId, out playlistUrl);
+			return Utils.GenerateVodPlaylistUrl(this, formatId, out playlistUrl);
 		}
 
 		public int GetPlaylistManifestUrl(out string manifestUrl)

@@ -530,7 +530,7 @@ namespace TwitchApiLib
 			specialId = t.Substring(0, t.IndexOf("/"));
 		}
 
-		public static int GetVodPlaylistUrl(string serverId, string vodSpecialId, string formatId,
+		public static int GenerateVodPlaylistUrl(string serverId, string vodSpecialId, string formatId,
 			string vodId, TwitchVodType vodType, out string playlistUrl)
 		{
 			if (string.IsNullOrEmpty(serverId) || string.IsNullOrWhiteSpace(serverId) ||
@@ -564,20 +564,20 @@ namespace TwitchApiLib
 			}
 		}
 
-		public static int GetVodPlaylistUrl(string serverId, string vodSpecialId, string formatId, out string playlistUrl)
+		public static int GenerateVodPlaylistUrl(string serverId, string vodSpecialId, string formatId, out string playlistUrl)
 		{
-			return GetVodPlaylistUrl(serverId, vodSpecialId, formatId, null, TwitchVodType.Archive, out playlistUrl);
+			return GenerateVodPlaylistUrl(serverId, vodSpecialId, formatId, null, TwitchVodType.Archive, out playlistUrl);
 		}
 
-		public static int GetVodPlaylistUrl(TwitchVod vod, string formatId, out string playlistUrl)
+		public static int GenerateVodPlaylistUrl(TwitchVod vod, string formatId, out string playlistUrl)
 		{
 			vod.GetSpecialData(out string specialId, out string serverId);
-			return GetVodPlaylistUrl(serverId, specialId, formatId, vod.Id.ToString(), vod.VodType, out playlistUrl);
+			return GenerateVodPlaylistUrl(serverId, specialId, formatId, vod.Id.ToString(), vod.VodType, out playlistUrl);
 		}
 
-		public static int GetVodPlaylistUrl(TwitchVod vod, out string playlistUrl)
+		public static int GenerateVodPlaylistUrl(TwitchVod vod, out string playlistUrl)
 		{
-			return GetVodPlaylistUrl(vod, "chunked", out playlistUrl);
+			return GenerateVodPlaylistUrl(vod, "chunked", out playlistUrl);
 		}
 
 		public static TwitchPlaybackAccessMode GetPlaybackAccessMode(
