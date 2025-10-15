@@ -105,8 +105,22 @@ namespace TwitchApiLib.ConsoleTest
 							/*Console.WriteLine($"User ID: {vodResult.Vod.User?.Id}");
 							Console.WriteLine($"User login: {vodResult.Vod.User?.Login}");
 							Console.WriteLine($"User name: {vodResult.Vod.User?.DisplayName}");*/
-							string playlistUrl = vodResult.Vod.Playlist?.PlaylistUrl ?? "<Not found>";
-							Console.WriteLine($"Playlist URL: {playlistUrl}");
+							if (vodResult.Vod.PlaylistManifest != null)
+							{
+								Console.WriteLine($"Playlist URLs:");
+								for (int i = vodResult.Vod.PlaylistManifest.Count - 1; i >= 0; --i)
+								{
+									TwitchVodPlaylistManifestItem item = vodResult.Vod.PlaylistManifest[i];
+									string url = item.PlaylistUrl ?? "<No URL found>";
+									string t = !item.IsAudioOnly() ? $"{item.ResolutionWidth}x{item.ResolutionHeight} | {item.FrameRate} fps" : item.FormatId;
+									Console.WriteLine($"{t} | {url}");
+								}
+							}
+							else
+							{
+								Console.WriteLine($"Playlist URLs: <Not found>");
+							}
+
 							Console.WriteLine();
 						}
 					}
