@@ -46,7 +46,9 @@ namespace TwitchApiLib
 					Dictionary<string, string> dict = Utils.SplitStringToKeyValues(str, ",", '=');
 					if (dict == null)
 					{
+#if DEBUG
 						System.Diagnostics.Debug.WriteLine("Dictionary error in 'TwitchVodPlaylistManifest.Parse()'");
+#endif
 						continue;
 					}
 

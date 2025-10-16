@@ -163,9 +163,15 @@ namespace TwitchApiLib
 						languageCode, thumbnailUrlTemplate, tags, isMature);
 					return live;
 				}
-			} catch (Exception ex)
+			}
+#if DEBUG
+			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine(ex.Message);
+#else
+			catch
+			{
+#endif
 			}
 
 			return null;
@@ -236,7 +242,9 @@ namespace TwitchApiLib
 			}
 			catch (Exception ex)
 			{
+#if DEBUG
 				System.Diagnostics.Debug.WriteLine(ex.Message);
+#endif
 				return new TwitchVodResult(null, ex.HResult, ex.Message, vodInfo.ToString());
 			}
 		}
@@ -676,7 +684,9 @@ namespace TwitchApiLib
 			}
 			catch (Exception ex)
 			{
+#if DEBUG
 				System.Diagnostics.Debug.WriteLine(ex.Message);
+#endif
 				response = ex.Message;
 				return ex.HResult;
 			}

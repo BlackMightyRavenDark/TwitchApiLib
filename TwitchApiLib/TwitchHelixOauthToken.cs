@@ -37,9 +37,15 @@ namespace TwitchApiLib
 					AccessToken = json.Value<string>("access_token");
 					long expiresIn = json.Value<long>("expires_in");
 					ExpireDate = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
-				} catch (Exception ex)
+				}
+#if DEBUG
+				catch (Exception ex)
 				{
 					System.Diagnostics.Debug.WriteLine(ex.Message);
+#else
+				catch
+				{
+#endif
 					AccessToken = null;
 					ExpireDate = DateTime.MinValue;
 					return 400;
