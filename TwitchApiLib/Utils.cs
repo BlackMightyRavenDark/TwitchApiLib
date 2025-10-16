@@ -239,9 +239,36 @@ namespace TwitchApiLib
 			return null;
 		}
 
+		public static string GenerateUserInfoRequestUrl(string[] userLogins)
+		{
+			string logins = string.Empty;
+			foreach (string login in userLogins)
+			{
+				logins += $"login={login}&";
+			}
+			if (logins.Length > 1) { logins = logins.Substring(0, logins.Length - 1); }
+			return $"{TWITCH_API_HELIX_USERS_ENDPOINT_URL}?{logins}";
+		}
+
 		public static string GenerateUserInfoRequestUrl(string userLogin)
 		{
-			return $"{TWITCH_API_HELIX_USERS_ENDPOINT_URL}?login={userLogin}";
+			return GenerateUserInfoRequestUrl(new string[] { userLogin });
+		}
+
+		public static string GenerateUserInfoRequestUrl(uint[] userIds)
+		{
+			string ids = string.Empty;
+			foreach (uint id in userIds)
+			{
+				ids += $"id={id}&";
+			}
+			if (ids.Length > 1) { ids = ids.Substring(0, ids.Length - 1); }
+			return $"{TWITCH_API_HELIX_USERS_ENDPOINT_URL}?{ids}";
+		}
+
+		public static string GenerateUserInfoRequestUrl(uint userId)
+		{
+			return GenerateUserInfoRequestUrl(new uint[] { userId });
 		}
 
 		public static string GenerateVodInfoRequestUrl(ulong vodId)
