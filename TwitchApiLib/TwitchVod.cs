@@ -166,7 +166,8 @@ namespace TwitchApiLib
 
 			if (!string.IsNullOrEmpty(url) && !string.IsNullOrWhiteSpace(url))
 			{
-				FileDownloader d = new FileDownloader() { Url = url };
+				int timeout = GetConnectionTimeout();
+				FileDownloader d = new FileDownloader() { Url = url, ConnectionTimeout = timeout };
 				PreviewImageData = new MemoryStream();
 				int errorCode = d.Download(PreviewImageData);
 

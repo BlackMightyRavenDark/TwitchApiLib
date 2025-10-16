@@ -12,6 +12,8 @@ namespace TwitchApiLib
 		public const string TWITCH_CLIENT_ID = "gs7pui3law5lsi69yzi9qzyaqvlcsy";
 
 		private static string _userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0";
+		private static int _connectionTimeout = 10000;
+		private static object _connectionTimeoutLocker = new object();
 
 		public enum TwitchVodType { Undefined, Archive, Highlight, Upload, Unknown }
 		public enum TwitchBroadcasterType { Undefined, Affiliate, Partner, Unknown }
@@ -33,6 +35,22 @@ namespace TwitchApiLib
 			lock (_userAgent)
 			{
 				_userAgent = userAgent;
+			}
+		}
+
+		public static int GetConnectionTimeout()
+		{
+			lock (_connectionTimeoutLocker)
+			{
+				return _connectionTimeout;
+			}
+		}
+
+		public static void SetConnectionTimeout(int timeout)
+		{
+			lock (_connectionTimeoutLocker)
+			{
+				_connectionTimeout = timeout;
 			}
 		}
 

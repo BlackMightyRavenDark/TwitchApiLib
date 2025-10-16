@@ -84,8 +84,8 @@ namespace TwitchApiLib
 			if (errorCode == 200)
 			{
 				string url = GenerateChannelVideosRequestUrl(channelId, maxVideos, pageToken);
-
-				FileDownloader d = new FileDownloader() { Url = url };
+				int timeout = GetConnectionTimeout();
+				FileDownloader d = new FileDownloader() { Url = url, ConnectionTimeout = timeout };
 				d.Headers.Add("Client-ID", TWITCH_CLIENT_ID);
 				d.Headers.Add("Authorization", "Bearer " + token);
 				d.Headers.Add("User-Agent", GetUserAgent());
@@ -651,7 +651,8 @@ namespace TwitchApiLib
 			int errorCode = GetHelixOauthToken(out string token);
 			if (errorCode == 200)
 			{
-				FileDownloader d = new FileDownloader() { Url = url };
+				int timeout = GetConnectionTimeout();
+				FileDownloader d = new FileDownloader() { Url = url, ConnectionTimeout = timeout };
 				d.Headers.Add("Client-ID", TWITCH_CLIENT_ID);
 				d.Headers.Add("Authorization", "Bearer " + token);
 				d.Headers.Add("User-Agent", GetUserAgent());
@@ -716,7 +717,14 @@ namespace TwitchApiLib
 
 		internal static int DownloadString(string url, WebHeaderCollection headers, out string responseString)
 		{
-			FileDownloader d = new FileDownloader() { Url = url, Headers = headers, SkipHeaderRequest = true };
+			int timeout = GetConnectionTimeout();
+			FileDownloader d = new FileDownloader()
+			{
+				Url = url,
+				Headers = headers,
+				SkipHeaderRequest = true,
+				ConnectionTimeout = timeout
+			};
 			int errorCode = d.DownloadString(out responseString);
 			d.Dispose();
 			return errorCode;

@@ -44,8 +44,10 @@ namespace TwitchApiLib
 			if (PreviewImageData != null) { return 200; }
 
 			ActualPreviewImageUrl = imageUrl;
-			FileDownloader d = new FileDownloader() { Url = imageUrl };
 			PreviewImageData = new MemoryStream();
+
+			int timeout = TwitchApi.GetConnectionTimeout();
+			FileDownloader d = new FileDownloader() { Url = imageUrl, ConnectionTimeout = timeout };
 			int errorCode = d.Download(PreviewImageData);
 
 			if (errorCode != 200) { DisposePreviewImageData(); }
