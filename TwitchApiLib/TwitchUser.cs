@@ -58,8 +58,7 @@ namespace TwitchApiLib
 				}
 			}
 
-			string url = GenerateUserInfoRequestUrl(userLogin);
-			int errorCode = HttpGet_Helix(url, out string response);
+			int errorCode = FindRawUserInfo(userLogin, out JObject response);
 			if (errorCode == 200)
 			{
 				if (!IsUserExists(response))
@@ -218,16 +217,16 @@ namespace TwitchApiLib
 			return UpdateLiveStreamInfo(out _);
 		}
 
+		private static bool IsUserExists(JObject searchResultsJson)
+		{
+			JArray jaData = searchResultsJson.Value<JArray>("data");
+			return jaData != null && jaData.Count > 0;
+		}
+
 		private static bool IsUserExists(string searchResultsJson)
 		{
 			JObject json = TryParseJson(searchResultsJson);
-			if (json != null)
-			{
-				JArray jaData = json.Value<JArray>("data");
-				return jaData != null && jaData.Count > 0;
-			}
-
-			return false;
+			return json != null && IsUserExists(json);
 		}
 	}
 }

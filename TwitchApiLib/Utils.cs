@@ -65,14 +65,8 @@ namespace TwitchApiLib
 			return new TwitchVodPageResult(null, errorCode);
 		}
 
-		public static TwitchUser ParseTwitchUserInfo(string rawData)
+		public static TwitchUser ParseTwitchUserInfo(JObject json)
 		{
-			JObject json = TryParseJson(rawData);
-			if (json == null)
-			{
-				return null;
-			}
-
 			JArray jaData = json.Value<JArray>("data");
 			if (jaData == null || jaData.Count == 0)
 			{
@@ -95,7 +89,13 @@ namespace TwitchApiLib
 			TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetChannelPlaybackAccessMode(userLogin, out _);
 
 			return new TwitchUser(userId, userLogin, displayName, userType, broadcasterType, playbackAccessMode,
-				description, profileImageUrl, offlineImageUrl, viewCount, creationDate, rawData);
+				description, profileImageUrl, offlineImageUrl, viewCount, creationDate, json.ToString());
+		}
+
+		public static TwitchUser ParseTwitchUserInfo(string rawData)
+		{
+			JObject json = TryParseJson(rawData);
+			return json != null ? ParseTwitchUserInfo(json) : null;
 		}
 
 		public static TwitchChannelLiveInfo ParseChannelLiveInfo(JObject liveInfo)
@@ -297,6 +297,41 @@ namespace TwitchApiLib
 		public static string GenerateChannelLiveInfoRequestUrl(ulong channelId)
 		{
 			return $"{TWITCH_API_HELIX_STREAMS_ENDPOINT_URL}?user_id={channelId}";
+		}
+
+		public static int FindRawUserInfo(string[] userLogins, out JObject result)
+		{
+			string url = GenerateUserInfoRequestUrl(userLogins);
+			return FindRawUserInfoByUrl(url, out result);
+		}
+
+		public static int FindRawUserInfo(string userLogin, out JObject result)
+		{
+			return FindRawUserInfo(new string[] { userLogin }, out result);
+		}
+
+		public static int FindRawUserInfo(uint[] userIds, out JObject result)
+		{
+			string url = GenerateUserInfoRequestUrl(userIds);
+			return FindRawUserInfoByUrl(url, out result);
+		}
+
+		public static int FindRawUserInfo(uint userId, out JObject result)
+		{
+			return FindRawUserInfo(new uint[] { userId }, out result);
+		}
+
+		private static int FindRawUserInfoByUrl(string url, out JObject result)
+		{
+			int errorCode = HttpGet_Helix(url, out string response);
+			if (errorCode == 200)
+			{
+				result = TryParseJson(response);
+				return result != null ? 200 : 400;
+			}
+
+			result = null;
+			return errorCode;
 		}
 
 		private static TwitchBroadcasterType GetBroadcasterType(string broadcasterType)
