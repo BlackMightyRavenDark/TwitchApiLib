@@ -10,12 +10,12 @@ namespace TwitchApiLib
 		public const string TWITCH_CLIENT_SECRET = "srr2yi260t15ir6w0wq5blir22i9pq";
 
 		public string AccessToken { get; private set; } = null;
-		public DateTime ExpireDate { get; private set; } = DateTime.MinValue;
+		public DateTime ExpirationDate { get; private set; } = DateTime.MinValue;
 
 		public void Reset()
 		{
 			AccessToken = null;
-			ExpireDate = DateTime.MinValue;
+			ExpirationDate = DateTime.MinValue;
 		}
 
 		public int Update(string clientId)
@@ -30,13 +30,13 @@ namespace TwitchApiLib
 					if (json == null)
 					{
 						AccessToken = null;
-						ExpireDate = DateTime.MinValue;
+						ExpirationDate = DateTime.MinValue;
 						return 400;
 					}
 
 					AccessToken = json.Value<string>("access_token");
 					long expiresIn = json.Value<long>("expires_in");
-					ExpireDate = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
+					ExpirationDate = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
 				}
 #if DEBUG
 				catch (Exception ex)
@@ -47,7 +47,7 @@ namespace TwitchApiLib
 				{
 #endif
 					AccessToken = null;
-					ExpireDate = DateTime.MinValue;
+					ExpirationDate = DateTime.MinValue;
 					return 400;
 				}
 			}
@@ -57,7 +57,7 @@ namespace TwitchApiLib
 
 		public bool IsExpired()
 		{
-			return ExpireDate >= DateTime.Now ||
+			return ExpirationDate >= DateTime.Now ||
 				string.IsNullOrEmpty(AccessToken) || string.IsNullOrWhiteSpace(AccessToken);
 		}
 	}
