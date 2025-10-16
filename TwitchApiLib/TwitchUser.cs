@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using static TwitchApiLib.TwitchApi;
+using static TwitchApiLib.Utils;
 
 namespace TwitchApiLib
 {
@@ -49,7 +50,34 @@ namespace TwitchApiLib
 
 		public static TwitchUserResult Get(string userLogin)
 		{
-			return Utils.GetUserInfo(userLogin);
+			lock (_twitchUsers)
+			{
+				if (_twitchUsers.ContainsKey(userLogin))
+				{
+					return new TwitchUserResult(_twitchUsers[userLogin], 200);
+				}
+			}
+
+			string url = GenerateUserInfoRequestUrl(userLogin);
+			int errorCode = HttpGet_Helix(url, out string response);
+			if (errorCode == 200)
+			{
+				if (!IsUserExists(response))
+				{
+					return new TwitchUserResult(null, 404);
+				}
+
+				TwitchUser twitchUser = ParseTwitchUserInfo(response);
+				if (twitchUser == null)
+				{
+					return new TwitchUserResult(null, 400);
+				}
+
+				AddUser(twitchUser);
+				return new TwitchUserResult(twitchUser, errorCode);
+			}
+
+			return new TwitchUserResult(null, errorCode);
 		}
 
 		public JArray GetVideosRaw(uint maxVideos, uint videosPerPage = 10U)
@@ -118,7 +146,7 @@ namespace TwitchApiLib
 
 			foreach (JObject jVod in jaRawVods.Cast<JObject>())
 			{
-				TwitchVodResult vodResult = Utils.ParseVodInfo(jVod);
+				TwitchVodResult vodResult = ParseVodInfo(jVod);
 				resultList.Add(vodResult);
 
 				if (maxVideos > 0U && resultList.Count >= maxVideos) { break; }
@@ -143,7 +171,7 @@ namespace TwitchApiLib
 				ConcurrentBag<TwitchVodResult> bag = new ConcurrentBag<TwitchVodResult>();
 				var tasks = jaRawVods.Select(j => Task.Run(() =>
 				{
-					TwitchVodResult vodResult = Utils.ParseVodInfo(j as JObject);
+					TwitchVodResult vodResult = ParseVodInfo(j as JObject);
 					bag.Add(vodResult);
 				}));
 
@@ -188,6 +216,18 @@ namespace TwitchApiLib
 		public bool UpdateLiveStreamInfo()
 		{
 			return UpdateLiveStreamInfo(out _);
+		}
+
+		private static bool IsUserExists(string searchResultsJson)
+		{
+			JObject json = TryParseJson(searchResultsJson);
+			if (json != null)
+			{
+				JArray jaData = json.Value<JArray>("data");
+				return jaData != null && jaData.Count > 0;
+			}
+
+			return false;
 		}
 	}
 }

@@ -16,38 +16,6 @@ namespace TwitchApiLib
 
 		public static readonly TwitchHelixOauthToken TwitchHelixOauthToken = new TwitchHelixOauthToken();
 
-		public static TwitchUserResult GetUserInfo(string userLogin)
-		{
-			lock (_twitchUsers)
-			{
-				if (_twitchUsers.ContainsKey(userLogin))
-				{
-					return new TwitchUserResult(_twitchUsers[userLogin], 200);
-				}
-			}
-
-			string url = GenerateUserInfoRequestUrl(userLogin);
-			int errorCode = HttpGet_Helix(url, out string response);
-			if (errorCode == 200)
-			{
-				if (!IsUserExists(response))
-				{
-					return new TwitchUserResult(null, 404);
-				}
-
-				TwitchUser twitchUser = ParseTwitchUserInfo(response);
-				if (twitchUser == null)
-				{
-					return new TwitchUserResult(null, 400);
-				}
-
-				AddUser(twitchUser);
-				return new TwitchUserResult(twitchUser, errorCode);
-			}
-
-			return new TwitchUserResult(null, errorCode);
-		}
-
 		internal static TwitchVodResult GetTwitchVodInfo(ulong vodId)
 		{
 			string url = GenerateVodInfoRequestUrl(vodId);
@@ -349,18 +317,6 @@ namespace TwitchApiLib
 			}
 
 			return TwitchVodType.Unknown;
-		}
-
-		private static bool IsUserExists(string searchResultsJson)
-		{
-			JObject json = TryParseJson(searchResultsJson);
-			if (json != null)
-			{
-				JArray jaData = json.Value<JArray>("data");
-				return jaData != null && jaData.Count > 0;
-			}
-
-			return false;
 		}
 
 		public static int GetHelixOauthToken(string clientId, out string responseToken)
