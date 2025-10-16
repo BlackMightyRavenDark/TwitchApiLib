@@ -84,12 +84,8 @@ namespace TwitchApiLib
 			if (errorCode == 200)
 			{
 				string url = GenerateChannelVideosRequestUrl(channelId, maxVideos, pageToken);
-				int timeout = GetConnectionTimeout();
-				FileDownloader d = new FileDownloader() { Url = url, ConnectionTimeout = timeout };
-				d.Headers.Add("Client-ID", TWITCH_CLIENT_ID);
-				d.Headers.Add("Authorization", "Bearer " + token);
-				d.Headers.Add("User-Agent", GetUserAgent());
-
+				FileDownloader d = MakeTwitchApiBearerClient(token);
+				d.Url = url;
 				errorCode = d.DownloadString(out string response);
 				d.Dispose();
 
@@ -651,12 +647,8 @@ namespace TwitchApiLib
 			int errorCode = GetHelixOauthToken(out string token);
 			if (errorCode == 200)
 			{
-				int timeout = GetConnectionTimeout();
-				FileDownloader d = new FileDownloader() { Url = url, ConnectionTimeout = timeout };
-				d.Headers.Add("Client-ID", TWITCH_CLIENT_ID);
-				d.Headers.Add("Authorization", "Bearer " + token);
-				d.Headers.Add("User-Agent", GetUserAgent());
-
+				FileDownloader d = MakeTwitchApiBearerClient(token);
+				d.Url = url;
 				return d.DownloadString(out response);
 			}
 
@@ -733,6 +725,23 @@ namespace TwitchApiLib
 		internal static int DownloadString(string url, out string responseString)
 		{
 			return DownloadString(url, null, out responseString);
+		}
+
+		private static FileDownloader MakeTwitchApiBearerClient(string bearerAuthorizationToken)
+		{
+			string userAgent = GetUserAgent();
+			WebHeaderCollection headers = new WebHeaderCollection()
+			{
+				{ "Client-ID", TWITCH_CLIENT_ID },
+				{ "User-Agent", userAgent }
+			};
+			if (!string.IsNullOrEmpty(bearerAuthorizationToken) && !string.IsNullOrWhiteSpace(bearerAuthorizationToken))
+			{
+				headers.Add("Authorization", "Bearer " + bearerAuthorizationToken);
+			}
+
+			int timeout = GetConnectionTimeout();
+			return new FileDownloader() { Headers = headers, ConnectionTimeout = timeout };
 		}
 
 		internal static JObject TryParseJson(string jsonString, out string errorMessage)
