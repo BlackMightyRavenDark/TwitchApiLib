@@ -8,6 +8,8 @@ namespace TwitchApiLib
 	{
 		public string RawData { get; }
 
+		private JArray _parsedData;
+
 		public TwitchVideoMetadata(string rawData)
 		{
 			RawData = rawData;
@@ -15,18 +17,15 @@ namespace TwitchApiLib
 
 		public int GetVideoLengthSeconds()
 		{
-			if (RawData == null) { return 0; }
-
 			try
 			{
-				JArray jsonArr = Utils.TryParseJsonArray(RawData, out _);
-				if (jsonArr != null)
+				JArray jsonArr = Parse();
+				if (jsonArr == null) { return 0; }
+
+				JObject jVideo = jsonArr[0].Value<JObject>("data")?.Value<JObject>("video");
+				if (jVideo != null)
 				{
-					JObject jVideo = jsonArr[0].Value<JObject>("data")?.Value<JObject>("video");
-					if (jVideo != null)
-					{
-						return jVideo.Value<int>("lengthSeconds");
-					}
+					return jVideo.Value<int>("lengthSeconds");
 				}
 			}
 #if DEBUG
@@ -44,9 +43,7 @@ namespace TwitchApiLib
 
 		public TwitchGame GetGameInfo()
 		{
-			if (string.IsNullOrEmpty(RawData)) { return null; }
-
-			JArray jsonArr = Utils.TryParseJsonArray(RawData, out _);
+			JArray jsonArr = Parse();
 			if (jsonArr != null && jsonArr.Count > 0 && jsonArr[0] != null)
 			{
 				JObject jGame = jsonArr[0].Value<JObject>("data")?.Value<JObject>("video")?.Value<JObject>("game");
@@ -80,6 +77,18 @@ namespace TwitchApiLib
 			}
 
 			return TwitchGame.CreateUnknownGame();
+		}
+
+		public JArray Parse(out string errorMessage)
+		{
+			if (_parsedData == null) { _parsedData = Utils.TryParseJsonArray(RawData, out errorMessage); }
+			else { errorMessage = null; }
+			return _parsedData;
+		}
+
+		public JArray Parse()
+		{
+			return Parse(out _);
 		}
 	}
 }
