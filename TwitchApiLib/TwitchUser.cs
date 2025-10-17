@@ -60,7 +60,35 @@ namespace TwitchApiLib
 			if (errorCode == 200)
 			{
 				errorCode = ParseRawUserInfo(response, out TwitchUser user);
-				if (errorCode == 200) { _twitchUserLogins[userLogin] = user; }
+				if (errorCode == 200)
+				{
+					_twitchUserLogins[userLogin] = user;
+					_twitchUserIds[user.Id] = user;
+				}
+
+				return new TwitchUserResult(user, errorCode);
+			}
+
+			return new TwitchUserResult(null, errorCode);
+		}
+
+		public static TwitchUserResult Get(ulong userId, bool getFromCache = true)
+		{
+			if (getFromCache && _twitchUserIds.ContainsKey(userId) &&
+				_twitchUserIds.TryGetValue(userId, out TwitchUser cachedUser))
+			{
+				return new TwitchUserResult(cachedUser, 200);
+			}
+
+			int errorCode = FindRawUserInfo(userId, out JObject response);
+			if (errorCode == 200)
+			{
+				errorCode = ParseRawUserInfo(response, out TwitchUser user);
+				if (errorCode == 200)
+				{
+					_twitchUserLogins[user.Login] = user;
+					_twitchUserIds[userId] = user;
+				}
 
 				return new TwitchUserResult(user, errorCode);
 			}

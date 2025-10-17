@@ -19,7 +19,8 @@ namespace TwitchApiLib
 		public enum TwitchBroadcasterType { Undefined, Affiliate, Partner, Unknown }
 		public enum TwitchPlaybackAccessMode { Free, SubscribersOnly, Unknown }
 
-		internal static ConcurrentDictionary<string, TwitchUser> _twitchUserLogins = new ConcurrentDictionary<string, TwitchUser>();
+        internal static ConcurrentDictionary<string, TwitchUser> _twitchUserLogins = new ConcurrentDictionary<string, TwitchUser>();
+		internal static ConcurrentDictionary<ulong, TwitchUser> _twitchUserIds = new ConcurrentDictionary<ulong, TwitchUser>();
 		internal static ConcurrentDictionary<ulong, TwitchGame> _twitchGames = new ConcurrentDictionary<ulong, TwitchGame>();
 
 		public static string GetUserAgent()

@@ -255,10 +255,10 @@ namespace TwitchApiLib
 			return GenerateUserInfoRequestUrl(new string[] { userLogin });
 		}
 
-		public static string GenerateUserInfoRequestUrl(uint[] userIds)
+		public static string GenerateUserInfoRequestUrl(ulong[] userIds)
 		{
 			string ids = string.Empty;
-			foreach (uint id in userIds)
+			foreach (ulong id in userIds)
 			{
 				ids += $"id={id}&";
 			}
@@ -266,9 +266,9 @@ namespace TwitchApiLib
 			return $"{TWITCH_API_HELIX_USERS_ENDPOINT_URL}?{ids}";
 		}
 
-		public static string GenerateUserInfoRequestUrl(uint userId)
+		public static string GenerateUserInfoRequestUrl(ulong userId)
 		{
-			return GenerateUserInfoRequestUrl(new uint[] { userId });
+			return GenerateUserInfoRequestUrl(new ulong[] { userId });
 		}
 
 		public static string GenerateVodInfoRequestUrl(ulong vodId)
@@ -310,15 +310,15 @@ namespace TwitchApiLib
 			return FindRawUserInfo(new string[] { userLogin }, out result);
 		}
 
-		public static int FindRawUserInfo(uint[] userIds, out JObject result)
+		public static int FindRawUserInfo(ulong[] userIds, out JObject result)
 		{
 			string url = GenerateUserInfoRequestUrl(userIds);
 			return FindRawUserInfoByUrl(url, out result);
 		}
 
-		public static int FindRawUserInfo(uint userId, out JObject result)
+		public static int FindRawUserInfo(ulong userId, out JObject result)
 		{
-			return FindRawUserInfo(new uint[] { userId }, out result);
+			return FindRawUserInfo(new ulong[] { userId }, out result);
 		}
 
 		private static int FindRawUserInfoByUrl(string url, out JObject result)
