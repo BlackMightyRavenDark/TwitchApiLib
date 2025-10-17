@@ -61,19 +61,10 @@ namespace TwitchApiLib
 			int errorCode = FindRawUserInfo(userLogin, out JObject response);
 			if (errorCode == 200)
 			{
-				if (!IsUserExists(response))
-				{
-					return new TwitchUserResult(null, 404);
-				}
+				errorCode = ParseRawUserInfo(response, out TwitchUser user);
+				if (errorCode == 200) { AddUser(user); }
 
-				TwitchUser twitchUser = ParseTwitchUserInfo(response);
-				if (twitchUser == null)
-				{
-					return new TwitchUserResult(null, 400);
-				}
-
-				AddUser(twitchUser);
-				return new TwitchUserResult(twitchUser, errorCode);
+				return new TwitchUserResult(user, errorCode);
 			}
 
 			return new TwitchUserResult(null, errorCode);
@@ -221,6 +212,18 @@ namespace TwitchApiLib
 		{
 			JArray jaData = searchResultsJson.Value<JArray>("data");
 			return jaData != null && jaData.Count > 0;
+		}
+
+		public static int ParseRawUserInfo(JObject rawUserInfo, out TwitchUser result)
+		{
+			if (!IsUserExists(rawUserInfo))
+			{
+				result = null;
+				return 404;
+			}
+
+			result = ParseTwitchUserInfo(rawUserInfo);
+			return result != null ? 200 : 400;
 		}
 	}
 }
