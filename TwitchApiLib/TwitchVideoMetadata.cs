@@ -58,9 +58,9 @@ namespace TwitchApiLib
 						id = 0UL;
 					}
 
-					lock (_twitchGames)
+					if (_twitchGames.ContainsKey(id) && _twitchGames.TryGetValue(id, out TwitchGame cachedGame))
 					{
-						if (_twitchGames.ContainsKey(id)) { return _twitchGames[id]; }
+						return cachedGame;
 					}
 
 					string title = jGame.Value<string>("name");
@@ -73,7 +73,7 @@ namespace TwitchApiLib
 					}
 
 					TwitchGame game = new TwitchGame(title, displayName, id, boxArtUrl, jGame.ToString());
-					AddGame(game);
+					_twitchGames[id] = game;
 
 					return game;
 				}

@@ -50,22 +50,17 @@ namespace TwitchApiLib
 
 		public static TwitchUserResult Get(string userLogin, bool getFromCache = true)
 		{
-			if (getFromCache)
+			if (getFromCache && _twitchUserLogins.ContainsKey(userLogin) &&
+				_twitchUserLogins.TryGetValue(userLogin, out TwitchUser cachedUser))
 			{
-				lock (_twitchUsers)
-				{
-					if (_twitchUsers.ContainsKey(userLogin))
-					{
-						return new TwitchUserResult(_twitchUsers[userLogin], 200);
-					}
-				}
+				return new TwitchUserResult(cachedUser, 200);
 			}
 
 			int errorCode = FindRawUserInfo(userLogin, out JObject response);
 			if (errorCode == 200)
 			{
 				errorCode = ParseRawUserInfo(response, out TwitchUser user);
-				if (errorCode == 200) { AddUser(user); }
+				if (errorCode == 200) { _twitchUserLogins[userLogin] = user; }
 
 				return new TwitchUserResult(user, errorCode);
 			}

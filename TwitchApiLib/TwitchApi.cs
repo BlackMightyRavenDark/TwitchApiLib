@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 
 namespace TwitchApiLib
 {
@@ -19,8 +19,8 @@ namespace TwitchApiLib
 		public enum TwitchBroadcasterType { Undefined, Affiliate, Partner, Unknown }
 		public enum TwitchPlaybackAccessMode { Free, SubscribersOnly, Unknown }
 
-		internal static Dictionary<string, TwitchUser> _twitchUsers = new Dictionary<string, TwitchUser>();
-		internal static Dictionary<ulong, TwitchGame> _twitchGames = new Dictionary<ulong, TwitchGame>();
+		internal static ConcurrentDictionary<string, TwitchUser> _twitchUserLogins = new ConcurrentDictionary<string, TwitchUser>();
+		internal static ConcurrentDictionary<ulong, TwitchGame> _twitchGames = new ConcurrentDictionary<ulong, TwitchGame>();
 
 		public static string GetUserAgent()
 		{
@@ -51,28 +51,6 @@ namespace TwitchApiLib
 			lock (_connectionTimeoutLocker)
 			{
 				_connectionTimeout = timeout;
-			}
-		}
-
-		internal static void AddUser(TwitchUser user)
-		{
-			lock (_twitchUsers)
-			{
-				if (!_twitchUsers.ContainsKey(user.Login))
-				{
-					_twitchUsers[user.Login] = user;
-				}
-			}
-		}
-
-		internal static void AddGame(TwitchGame game)
-		{
-			lock (_twitchGames)
-			{
-				if (!_twitchGames.ContainsKey(game.Id))
-				{
-					_twitchGames[game.Id] = game;
-				}
 			}
 		}
 	}
