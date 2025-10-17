@@ -57,7 +57,7 @@ namespace TwitchApiLib
 
 		public bool IsExpired()
 		{
-			return ExpirationDate >= DateTime.Now ||
+			return ExpirationDate < DateTime.Now ||
 				string.IsNullOrEmpty(AccessToken) || string.IsNullOrWhiteSpace(AccessToken);
 		}
 
