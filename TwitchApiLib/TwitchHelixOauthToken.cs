@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 
 namespace TwitchApiLib
 {
 	public class TwitchHelixOauthToken
 	{
-		public const string TWITCH_HELIX_OAUTH_TOKEN_URL_TEMPLATE =
-			"https://id.twitch.tv/oauth2/token?client_id={0}&client_secret={1}&grant_type=client_credentials";
+		public const string TWITCH_HELIX_OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 		public const string TWITCH_CLIENT_SECRET = "srr2yi260t15ir6w0wq5blir22i9pq";
 
 		public string AccessToken { get; private set; } = null;
@@ -18,9 +18,9 @@ namespace TwitchApiLib
 			ExpirationDate = DateTime.MinValue;
 		}
 
-		public int Update(string clientId)
+		public int Update(string clientId, string clientSecretKey = null)
 		{
-			string url = string.Format(TWITCH_HELIX_OAUTH_TOKEN_URL_TEMPLATE, clientId, TWITCH_CLIENT_SECRET);
+			string url = FormatTokenUrl(clientId, clientSecretKey ?? TWITCH_CLIENT_SECRET);
 			int errorCode = Utils.HttpPost(url, out string response);
 			if (errorCode == 200)
 			{
@@ -59,6 +59,16 @@ namespace TwitchApiLib
 		{
 			return ExpirationDate >= DateTime.Now ||
 				string.IsNullOrEmpty(AccessToken) || string.IsNullOrWhiteSpace(AccessToken);
+		}
+
+		public static string FormatTokenUrl(string clientId, string clientSecretKey)
+		{
+			NameValueCollection query = System.Web.HttpUtility.ParseQueryString(string.Empty);
+			query.Add("client_id", clientId);
+			query.Add("client_secret", clientSecretKey);
+			query.Add("grant_type", "client_credentials");
+
+			return $"{TWITCH_HELIX_OAUTH_TOKEN_URL}?{query}";
 		}
 	}
 }
