@@ -91,7 +91,7 @@ namespace TwitchApiLib
 				TwitchVodPageResult vodPageResult = TwitchVodPage.Get(Id, videosPerPage, pageToken);
 				if (vodPageResult.ErrorCode != 200 || vodPageResult.VodPage == null) { break; }
 
-				JObject json = Utils.TryParseJson(vodPageResult.VodPage.RawData);
+				JObject json = TryParseJson(vodPageResult.VodPage.RawData);
 				if (json == null) { break; }
 
 				JArray jaData = json.Value<JArray>("data");
@@ -221,12 +221,6 @@ namespace TwitchApiLib
 		{
 			JArray jaData = searchResultsJson.Value<JArray>("data");
 			return jaData != null && jaData.Count > 0;
-		}
-
-		private static bool IsUserExists(string searchResultsJson)
-		{
-			JObject json = TryParseJson(searchResultsJson);
-			return json != null && IsUserExists(json);
 		}
 	}
 }
