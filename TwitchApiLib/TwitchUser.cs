@@ -48,13 +48,16 @@ namespace TwitchApiLib
 			RawData = rawData;
 		}
 
-		public static TwitchUserResult Get(string userLogin)
+		public static TwitchUserResult Get(string userLogin, bool getFromCache = true)
 		{
-			lock (_twitchUsers)
+			if (getFromCache)
 			{
-				if (_twitchUsers.ContainsKey(userLogin))
+				lock (_twitchUsers)
 				{
-					return new TwitchUserResult(_twitchUsers[userLogin], 200);
+					if (_twitchUsers.ContainsKey(userLogin))
+					{
+						return new TwitchUserResult(_twitchUsers[userLogin], 200);
+					}
 				}
 			}
 
