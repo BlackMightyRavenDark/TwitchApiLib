@@ -383,9 +383,12 @@ namespace TwitchApiLib
 
 		public static int GetHelixOauthToken(string clientId, out string responseToken)
 		{
-			int errorCode = TwitchHelixOauthToken.IsExpired() ? TwitchHelixOauthToken.Update(clientId) : 200;
-			responseToken = errorCode == 200 ? TwitchHelixOauthToken.AccessToken : null;
-			return errorCode;
+			lock (TwitchHelixOauthToken)
+			{
+				int errorCode = TwitchHelixOauthToken.IsExpired() ? TwitchHelixOauthToken.Update(clientId) : 200;
+				responseToken = errorCode == 200 ? TwitchHelixOauthToken.AccessToken : null;
+				return errorCode;
+			}
 		}
 
 		public static int GetHelixOauthToken(out string responseToken)
