@@ -18,7 +18,11 @@ namespace TwitchApiLib.ConsoleTest
 					return;
 				}
 
-				MultiThreadedDownloaderLib.Utils.ConnectionLimit = 100;
+				TwitchApi.SetApplication(new TwitchApplication(
+					"Test application", "No description",
+					"gs7pui3law5lsi69yzi9qzyaqvlcsy",
+					"srr2yi260t15ir6w0wq5blir22i9pq")
+				);
 				const string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0";
 				TwitchApi.SetUserAgent(userAgent);
 
@@ -41,6 +45,8 @@ namespace TwitchApiLib.ConsoleTest
 					Console.WriteLine();
 
 					Console.WriteLine("Retrieving channel videos...");
+
+					MultiThreadedDownloaderLib.Utils.ConnectionLimit = 100;
 
 					List<TwitchVodResult> vods = twitchUserResult.User.GetVideosMultiThreaded(10U);
 

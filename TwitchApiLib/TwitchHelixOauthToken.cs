@@ -7,7 +7,6 @@ namespace TwitchApiLib
 	public class TwitchHelixOauthToken
 	{
 		public const string TWITCH_HELIX_OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
-		public const string TWITCH_CLIENT_SECRET = "srr2yi260t15ir6w0wq5blir22i9pq";
 
 		public string AccessToken { get; private set; } = null;
 		public DateTime ExpirationDate { get; private set; } = DateTime.MinValue;
@@ -18,9 +17,9 @@ namespace TwitchApiLib
 			ExpirationDate = DateTime.MinValue;
 		}
 
-		public int Update(string clientId, string clientSecretKey = null)
+		public int Update(string clientId, string secretKey)
 		{
-			string url = FormatTokenUrl(clientId, clientSecretKey ?? TWITCH_CLIENT_SECRET);
+			string url = FormatTokenUrl(clientId, secretKey);
 			int errorCode = Utils.HttpPost(url, out string response);
 			if (errorCode == 200)
 			{
@@ -53,6 +52,11 @@ namespace TwitchApiLib
 			}
 
 			return errorCode;
+		}
+
+		public int Update(TwitchApplication application)
+		{
+			return Update(application.ClientId, application.ClientSecretKey);
 		}
 
 		public bool IsExpired()

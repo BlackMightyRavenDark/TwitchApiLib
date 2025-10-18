@@ -9,11 +9,10 @@ namespace TwitchApiLib
 		public const string TWITCH_API_HELIX_VIDEOS_ENDPOINT_URL = "https://api.twitch.tv/helix/videos";
 		public const string TWITCH_API_HELIX_STREAMS_ENDPOINT_URL = "https://api.twitch.tv/helix/streams";
 
-		public const string TWITCH_CLIENT_ID = "gs7pui3law5lsi69yzi9qzyaqvlcsy";
-
 		private static string _userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0";
 		private static int _connectionTimeout = 10000;
 		private static object _connectionTimeoutLocker = new object();
+		private static TwitchApplication _application = new TwitchApplication(null, null, null, null);
 
 		public enum TwitchVodType { Undefined, Archive, Highlight, Upload, Unknown }
 		public enum TwitchBroadcasterType { Undefined, Affiliate, Partner, Unknown }
@@ -28,6 +27,22 @@ namespace TwitchApiLib
 			_twitchUserLogins.Clear();
 			_twitchUserIds.Clear();
 			_twitchGames.Clear();
+		}
+
+		public static TwitchApplication GetApplication()
+		{
+			lock (_application)
+			{
+				return new TwitchApplication(_application);
+			}
+		}
+
+		public static void SetApplication(TwitchApplication application)
+		{
+			lock (application)
+			{
+				_application = application;
+			}
 		}
 
 		public static string GetUserAgent()
