@@ -42,7 +42,7 @@ namespace TwitchApiLib
 		{
 			lock (_userAgent)
 			{
-				_userAgent = userAgent;
+				_userAgent = userAgent ?? string.Empty;
 			}
 		}
 
