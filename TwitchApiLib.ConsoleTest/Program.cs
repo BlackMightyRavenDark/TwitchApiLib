@@ -38,8 +38,8 @@ namespace TwitchApiLib.ConsoleTest
 					Console.WriteLine($"Broadcaster type: {twitchUserResult.User.BroadcasterType}");
 					Console.WriteLine($"Live stream access mode: {twitchUserResult.User.StreamPlaybackAccessMode}");
 					Console.WriteLine($"User description: {twitchUserResult.User.Description}");
-					Console.WriteLine($"Profile image url template: {twitchUserResult.User.ProfileImageUrl}");
-					Console.WriteLine($"Offline image url template: {twitchUserResult.User.OfflineImageUrl}");
+					Console.WriteLine($"Profile image URL template: {twitchUserResult.User.ProfileImageUrl}");
+					Console.WriteLine($"Offline image URL template: {twitchUserResult.User.OfflineImageUrl}");
 					Console.WriteLine($"View count: {twitchUserResult.User.ViewCount}");
 					Console.WriteLine($"Creation date: {twitchUserResult.User.CreationDate.FormatDateTime()}");
 					Console.WriteLine();
