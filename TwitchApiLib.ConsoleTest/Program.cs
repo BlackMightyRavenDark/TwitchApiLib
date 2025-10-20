@@ -18,10 +18,16 @@ namespace TwitchApiLib.ConsoleTest
 					return;
 				}
 
+				/*
+				 * Внимание! В данный момент представленные ниже ID и ключ могут оказаться устаревшими и не работать!
+				 * Вы должны заменить их на собственные! Сгенерировать их можно на странице:
+				 * https://dev.twitch.tv/console/
+				 */
 				TwitchApi.SetApplication(new TwitchApplication(
 					"Test application", "No description",
-					"gs7pui3law5lsi69yzi9qzyaqvlcsy",
-					"srr2yi260t15ir6w0wq5blir22i9pq")
+					"gs7pui3law5lsi69yzi9qzyaqvlcsy", // Client ID
+					"srr2yi260t15ir6w0wq5blir22i9pq"  // Secret key
+					)
 				);
 				const string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0";
 				TwitchApi.SetUserAgent(userAgent);
