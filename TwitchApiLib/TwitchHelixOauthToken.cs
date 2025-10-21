@@ -74,5 +74,10 @@ namespace TwitchApiLib
 
 			return $"{TWITCH_HELIX_OAUTH_TOKEN_URL}?{query}";
 		}
+
+		public static string FormatTokenUrl(TwitchApplication application)
+		{
+			return FormatTokenUrl(application.ClientId, application.ClientSecretKey);
+		}
 	}
 }
