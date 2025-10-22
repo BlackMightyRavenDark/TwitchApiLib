@@ -100,7 +100,7 @@ namespace TwitchApiLib
 
 		public int GetHlsPlaylistManifestUrl(out string playlistManifestUrl, out string errorMessage)
 		{
-			return GetHlsPlaylistManifestUrl(Guid.Empty, out playlistManifestUrl, out errorMessage);
+			return GetHlsPlaylistManifestUrl(Guid.NewGuid(), out playlistManifestUrl, out errorMessage);
 		}
 
 		public int GetHlsPlaylistManifestUrl(out string playlistManifestUrl)
