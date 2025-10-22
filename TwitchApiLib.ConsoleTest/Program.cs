@@ -32,6 +32,20 @@ namespace TwitchApiLib.ConsoleTest
 				const string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0";
 				TwitchApi.SetUserAgent(userAgent);
 
+				Utils.TwitchHelixOauthToken.TokenUpdating += s => Console.WriteLine("Twitch Helix API token is updating...");
+				Utils.TwitchHelixOauthToken.TokenUpdated += (s, errorCode) =>
+				{
+					if (errorCode == 200)
+					{
+						TwitchHelixOauthToken token = s as TwitchHelixOauthToken;
+						Console.WriteLine($"Twitch Helix API token is successfully updated! New token: {token.AccessToken}, Expires at: {token.ExpirationDate.FormatDateTime()}");
+					}
+					else
+					{
+						Console.WriteLine($"There is an error while updating the Twitch Helix API token! Code {errorCode}.");
+					}
+				};
+
 				Console.WriteLine("Retrieving user info...");
 				TwitchUserResult twitchUserResult = TwitchUser.Get(userName.ToLower());
 				if (twitchUserResult.ErrorCode == 200)

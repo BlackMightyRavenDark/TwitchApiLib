@@ -11,6 +11,11 @@ namespace TwitchApiLib
 		public string AccessToken { get; private set; } = null;
 		public DateTime ExpirationDate { get; private set; } = DateTime.MinValue;
 
+		public delegate void TwitchHelixOauthTokenUpdatingDelegate(object sender);
+		public delegate void TwitchHelixOauthTokenUpdatedDelegate(object sender, int errorCode);
+		public TwitchHelixOauthTokenUpdatingDelegate TokenUpdating { get; set; }
+		public TwitchHelixOauthTokenUpdatedDelegate TokenUpdated { get; set; }
+
 		public void Reset()
 		{
 			AccessToken = null;
@@ -19,6 +24,7 @@ namespace TwitchApiLib
 
 		public int Update(string clientId, string secretKey)
 		{
+			TokenUpdating?.Invoke(this);
 			string url = FormatTokenUrl(clientId, secretKey);
 			int errorCode = Utils.HttpPost(url, out string response);
 			if (errorCode == 200)
@@ -36,6 +42,9 @@ namespace TwitchApiLib
 					AccessToken = json.Value<string>("access_token");
 					long expiresIn = json.Value<long>("expires_in");
 					ExpirationDate = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
+
+					TokenUpdated?.Invoke(this, errorCode);
+					return errorCode;
 				}
 #if DEBUG
 				catch (Exception ex)
@@ -47,10 +56,12 @@ namespace TwitchApiLib
 #endif
 					AccessToken = null;
 					ExpirationDate = DateTime.MinValue;
+					TokenUpdated?.Invoke(this, 400);
 					return 400;
 				}
 			}
 
+			TokenUpdated?.Invoke(this, errorCode);
 			return errorCode;
 		}
 
