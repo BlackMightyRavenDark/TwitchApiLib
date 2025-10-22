@@ -41,7 +41,8 @@ namespace TwitchApiLib
 
 					AccessToken = json.Value<string>("access_token");
 					long expiresIn = json.Value<long>("expires_in");
-					ExpirationDate = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
+					DateTime date = DateTime.UtcNow.Add(TimeSpan.FromSeconds(expiresIn));
+					ExpirationDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, 0, DateTimeKind.Utc);
 
 					TokenUpdated?.Invoke(this, errorCode);
 					return errorCode;
@@ -72,7 +73,7 @@ namespace TwitchApiLib
 
 		public bool IsExpired()
 		{
-			return ExpirationDate < DateTime.Now ||
+			return ExpirationDate <= DateTime.UtcNow ||
 				string.IsNullOrEmpty(AccessToken) || string.IsNullOrWhiteSpace(AccessToken);
 		}
 
