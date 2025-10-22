@@ -736,24 +736,25 @@ namespace TwitchApiLib
 			return HttpPost(url, null, out response);
 		}
 
-		internal static int DownloadString(string url, WebHeaderCollection headers, out string responseString)
+		internal static int DownloadString(string url, out string responseString,
+			FileDownloader downloader = null)
 		{
-			int timeout = GetConnectionTimeout();
-			FileDownloader d = new FileDownloader()
+			if (downloader == null)
 			{
-				Url = url,
-				Headers = headers,
-				SkipHeaderRequest = true,
-				ConnectionTimeout = timeout
-			};
-			int errorCode = d.DownloadString(out responseString);
-			d.Dispose();
-			return errorCode;
-		}
+				int timeout = GetConnectionTimeout();
+				downloader = new FileDownloader()
+				{
+					Url = url,
+					SkipHeaderRequest = true,
+					ConnectionTimeout = timeout
+				};
 
-		internal static int DownloadString(string url, out string responseString)
-		{
-			return DownloadString(url, null, out responseString);
+				downloader.Headers["User-Agent"] = GetUserAgent();
+			}
+
+			int errorCode = downloader.DownloadString(out responseString);
+			downloader.Dispose();
+			return errorCode;
 		}
 
 		private static FileDownloader MakeTwitchApiBearerClient(string clientId, string bearerAuthorizationToken)
