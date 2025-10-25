@@ -739,7 +739,8 @@ namespace TwitchApiLib
 		internal static int DownloadString(string url, out string responseString,
 			FileDownloader downloader = null)
 		{
-			if (downloader == null)
+			bool ownDownloader = downloader == null;
+			if (ownDownloader)
 			{
 				downloader = MakeDefaultDownloader();
 				downloader.Url = url;
@@ -747,7 +748,7 @@ namespace TwitchApiLib
 			}
 
 			int errorCode = downloader.DownloadString(out responseString);
-			downloader.Dispose();
+			if (ownDownloader) { downloader.Dispose(); }
 			return errorCode;
 		}
 
