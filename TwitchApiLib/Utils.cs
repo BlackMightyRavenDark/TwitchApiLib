@@ -741,15 +741,9 @@ namespace TwitchApiLib
 		{
 			if (downloader == null)
 			{
-				int timeout = GetConnectionTimeout();
-				downloader = new FileDownloader()
-				{
-					Url = url,
-					SkipHeaderRequest = true,
-					ConnectionTimeout = timeout
-				};
-
-				downloader.Headers["User-Agent"] = GetUserAgent();
+				downloader = MakeDefaultDownloader();
+				downloader.Url = url;
+				downloader.SkipHeaderRequest = true;
 			}
 
 			int errorCode = downloader.DownloadString(out responseString);
@@ -759,19 +753,23 @@ namespace TwitchApiLib
 
 		private static FileDownloader MakeTwitchApiBearerClient(string clientId, string bearerAuthorizationToken)
 		{
-			string userAgent = GetUserAgent();
-			WebHeaderCollection headers = new WebHeaderCollection()
-			{
-				{ "Client-ID", clientId },
-				{ "User-Agent", userAgent }
-			};
+			FileDownloader d = MakeDefaultDownloader();
+			d.Headers.Add("Client-ID", clientId);
 			if (!string.IsNullOrEmpty(bearerAuthorizationToken) && !string.IsNullOrWhiteSpace(bearerAuthorizationToken))
 			{
-				headers.Add("Authorization", "Bearer " + bearerAuthorizationToken);
+				d.Headers.Add("Authorization", "Bearer " + bearerAuthorizationToken);
 			}
 
+			return d;
+		}
+
+		internal static FileDownloader MakeDefaultDownloader()
+		{
 			int timeout = GetConnectionTimeout();
-			return new FileDownloader() { Headers = headers, ConnectionTimeout = timeout };
+			string userAgent = GetUserAgent();
+			FileDownloader d = new FileDownloader() { ConnectionTimeout = timeout };
+			d.Headers.Add("User-Agent", userAgent);
+			return d;
 		}
 
 		internal static JObject TryParseJson(string jsonString, out string errorMessage)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
+using MultiThreadedDownloaderLib;
 
 namespace TwitchApiLib
 {
@@ -20,6 +21,9 @@ namespace TwitchApiLib
 		public string ThumbnailUrlTemplate { get; }
 		public string[] Tags { get; }
 		public bool IsMature { get; }
+
+		public delegate bool HlsManifestGettingDelegate(object sender,
+			string manifestUrl, FileDownloader downloader);
 
 		public TwitchChannelLiveInfo(
 			ulong id, ulong userId, string userLogin, string userName,
@@ -108,18 +112,42 @@ namespace TwitchApiLib
 			return GetHlsPlaylistManifestUrl(out playlistManifestUrl, out _);
 		}
 
-		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest()
+		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest(Guid deviceId,
+			FileDownloader downloader, HlsManifestGettingDelegate manifestGetting, out string errorMessage)
 		{
-			int errorCode = GetHlsPlaylistManifestUrl(out string manifestUrl);
+			int errorCode = GetHlsPlaylistManifestUrl(deviceId, out string manifestUrl, out errorMessage);
 			if (errorCode == 200)
 			{
-				errorCode = Utils.DownloadString(manifestUrl, out string manifestText);
+				bool ownDownloader = downloader == null;
+				if (ownDownloader)
+				{
+					downloader = Utils.MakeDefaultDownloader();
+					downloader.Url = manifestUrl;
+				}
+				manifestGetting?.Invoke(this, manifestUrl, downloader);
+				errorCode = Utils.DownloadString(downloader.Url, out string manifestText, downloader);
+				if (ownDownloader) { downloader.Dispose(); }
 				TwitchVodPlaylistManifest playlistManifest = errorCode == 200 ?
 					new TwitchVodPlaylistManifest(manifestText) : null;
 				return new TwitchVodPlaylistManifestResult(playlistManifest, errorCode);
 			}
 
 			return new TwitchVodPlaylistManifestResult(null, errorCode);
+		}
+
+		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest(HlsManifestGettingDelegate manifestGetting, out string errorMessage)
+		{
+			return GetHlsPlaylistManifest(Guid.NewGuid(), null, manifestGetting, out errorMessage);
+		}
+
+		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest(out string errorMessage)
+		{
+			return GetHlsPlaylistManifest(null, out errorMessage);
+		}
+
+		public TwitchVodPlaylistManifestResult GetHlsPlaylistManifest()
+		{
+			return GetHlsPlaylistManifest(out _);
 		}
 
 		public string FormatThumbnailTemplateUrl(ushort imageWidth, ushort imageHeight)
