@@ -117,24 +117,27 @@ namespace TwitchApiLib
 		{
 			if (Count > 1)
 			{
-				Items.Sort((x, y) =>
+				int sortingFunc(TwitchVodPlaylistManifestItem x, TwitchVodPlaylistManifestItem y)
 				{
 					if (x.Bandwidth == 0 || y.Bandwidth == 0)
 					{
-						if (x.FormatId == "chunked") { return -1; }
-						else if (y.FormatId == "chunked") { return 1; }
+						if (string.Equals(x.FormatId, "chunked", StringComparison.OrdinalIgnoreCase)) { return -1; }
+						else if (string.Equals(y.FormatId, "chunked", StringComparison.OrdinalIgnoreCase)) { return 1; }
 						else { return 0; }
 					}
 
 					return x.Bandwidth > y.Bandwidth ? -1 : 1;
-				});
+				}
 
-				TwitchVodPlaylistManifestItem[] videoItems = GetVideoItems().ToArray();
-				TwitchVodPlaylistManifestItem[] audioItems = GetAudioItems().ToArray();
+				List<TwitchVodPlaylistManifestItem> videoItems = GetVideoItems().ToList();
+				if (videoItems.Count > 1) { videoItems.Sort(sortingFunc); }
+
+				List<TwitchVodPlaylistManifestItem> audioItems = GetAudioItems().ToList();
+				if (audioItems.Count > 1) { audioItems.Sort(sortingFunc); }
 
 				Items.Clear();
-				Items.AddRange(videoItems);
-				Items.AddRange(audioItems);
+				if (videoItems.Count > 0) { Items.AddRange(videoItems); }
+				if (audioItems.Count > 0) { Items.AddRange(audioItems); }
 			}
 		}
 
