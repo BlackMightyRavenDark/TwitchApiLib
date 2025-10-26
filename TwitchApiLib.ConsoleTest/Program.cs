@@ -46,7 +46,7 @@ namespace TwitchApiLib.ConsoleTest
 					}
 				};
 
-				Console.WriteLine("Retrieving user info...");
+				Console.WriteLine("Receiving user info...");
 				TwitchUserResult twitchUserResult = TwitchUser.Get(userName.ToLower());
 				if (twitchUserResult.ErrorCode == 200)
 				{
