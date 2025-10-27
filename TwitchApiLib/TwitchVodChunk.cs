@@ -4,21 +4,23 @@ namespace TwitchApiLib
 {
 	public class TwitchVodChunk
 	{
+		public int Id { get; }
 		public string FileName { get; private set; }
 		public double Offset { get; }
 		public double Duration { get; }
 
 		public enum TwitchVodChunkState { NotMuted, Muted, Unmuted };
 
-		public TwitchVodChunk(string fileName, double offset, double duration)
+		public TwitchVodChunk(int id, string fileName, double offset, double duration)
 		{
+			Id = id;
 			FileName = fileName;
 			Offset = offset;
 			Duration = duration;
 		}
 
 		public TwitchVodChunk(TwitchVodChunk chunk) :
-			this(chunk.FileName, chunk.Offset, chunk.Duration)
+			this(chunk.Id, chunk.FileName, chunk.Offset, chunk.Duration)
 		{ }
 
 		public string ExtractNumberFromFileName()

@@ -11,6 +11,7 @@ namespace TwitchApiLib
 		public string StreamRootUrl { get; }
 		public TwitchVodPlaylistManifestItem Information { get; }
 		public List<TwitchVodChunk> ChunkList { get; }
+		public int FirstChunkId { get; private set; }
 		public int Count => ChunkList.Count;
 		public TwitchVodMutedSegments MutedSegments => GetMutedSegments();
 		public string this[int id] => StreamRootUrl + ChunkList[id].FileName;
@@ -69,39 +70,39 @@ namespace TwitchApiLib
 				}
 
 				string[] strings = PlaylistRaw.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
-				int stringId = FindFirstChunkStringId(strings);
-				if (stringId >= 0)
+				if (strings.Length > 1)
 				{
-					double offset = 0.0;
-					for (; stringId < strings.Length; stringId += 2)
+					NumberFormatInfo numberFormatInfo = new NumberFormatInfo() { NumberDecimalSeparator = "." };
+
+					double chunkOffsetInPlaylist = 0.0;
+					int foundChunks = 0;
+					for (int i = 0; i < strings.Length; ++i)
 					{
-						string[] splitted = strings[stringId].Split(':');
-						if (splitted[0] != "#EXTINF") { continue; }
-						string[] lengthSplitted = splitted[1].Split(',');
+						string[] splitted = strings[i].Split(':');
+						if (splitted[0] == "#EXT-X-MEDIA-SEQUENCE" && int.TryParse(splitted[1], out int firstId))
+						{
+							FirstChunkId = firstId;
+							continue;
+						}
+						else if (splitted[0] == "#EXTINF")
+						{
+							string[] chunkLengthSplitted = splitted[1].Split(',');
 
-						NumberFormatInfo numberFormatInfo = new NumberFormatInfo() { NumberDecimalSeparator = "." };
-						double chunkLength = double.TryParse(lengthSplitted[0], NumberStyles.Any,
-							numberFormatInfo, out double d) ? d : 0.0;
+							double chunkLength = double.TryParse(chunkLengthSplitted[0], NumberStyles.Any,
+								numberFormatInfo, out double d) ? d : 0.0;
+							int chunkId = FirstChunkId + foundChunks;
+							TwitchVodChunk chunk = new TwitchVodChunk(chunkId, strings[i + 1], chunkOffsetInPlaylist, chunkLength);
+							ChunkList.Add(chunk);
 
-						TwitchVodChunk chunk = new TwitchVodChunk(strings[stringId + 1], offset, chunkLength);
-						ChunkList.Add(chunk);
-
-						offset += chunkLength;
+							chunkOffsetInPlaylist += chunkLength;
+							foundChunks++;
+							i++;
+						}
 					}
 				}
 			}
 
 			return ChunkList.Count;
-		}
-
-		private int FindFirstChunkStringId(string[] strings)
-		{
-			for (int i = 0; i < 20 && i < strings.Length; ++i)
-			{
-				if (strings[i].StartsWith("#EXTINF:")) { return i; }
-			}
-
-			return -1;
 		}
 
 		public TwitchVodMutedSegments GetMutedSegments(bool showChunkCount = false)
