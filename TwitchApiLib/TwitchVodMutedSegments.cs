@@ -65,23 +65,22 @@ namespace TwitchApiLib
 			return "<empty segment>";
 		}
 
-		public static TwitchVodMutedSegments ParseMutedSegments(List<TwitchVodChunk> chunkList)
+		public static TwitchVodMutedSegments ParseMutedSegments(IEnumerable<TwitchVodChunk> chunks)
 		{
 			TwitchVodMutedSegments result = new TwitchVodMutedSegments();
 			List<TwitchVodChunk> segmentList = null;
-			for (int i = 0; i < chunkList.Count; ++i)
+			foreach (TwitchVodChunk chunk in chunks)
 			{
-				if (chunkList[i].GetState() != TwitchVodChunkState.NotMuted)
+				if (chunk.GetState() != TwitchVodChunkState.NotMuted)
 				{
 					if (segmentList == null)
 					{
 						segmentList = new List<TwitchVodChunk>();
 					}
 
-					TwitchVodChunk chunk = new TwitchVodChunk(
-						chunkList[i].FileName, chunkList[i].Offset, chunkList[i].Duration);
-					result.Chunks.Add(chunk);
-					segmentList.Add(chunk);
+					TwitchVodChunk chunkCopy = new TwitchVodChunk(chunk);
+					result.Chunks.Add(chunkCopy);
+					segmentList.Add(chunkCopy);
 				}
 				else if (segmentList != null)
 				{
