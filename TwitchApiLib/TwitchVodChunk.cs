@@ -6,21 +6,29 @@ namespace TwitchApiLib
 	{
 		public int Id { get; }
 		public string FileName { get; private set; }
+		public string FileUrl { get; }
 		public double Offset { get; }
 		public double Duration { get; }
+		public DateTime CreationDate { get; }
+		public bool IsLiveStreamChunk { get; }
 
 		public enum TwitchVodChunkState { NotMuted, Muted, Unmuted };
 
-		public TwitchVodChunk(int id, string fileName, double offset, double duration)
+		public TwitchVodChunk(int id, string fileName, string fileUrl,
+			double offset, double duration, DateTime creationDate, bool isLiveStreamChunk)
 		{
 			Id = id;
 			FileName = fileName;
+			FileUrl = fileUrl;
 			Offset = offset;
 			Duration = duration;
+			CreationDate = creationDate;
+			IsLiveStreamChunk = isLiveStreamChunk;
 		}
 
 		public TwitchVodChunk(TwitchVodChunk chunk) :
-			this(chunk.Id, chunk.FileName, chunk.Offset, chunk.Duration)
+			this(chunk.Id, chunk.FileName, chunk.FileUrl, chunk.Offset,
+				chunk.Duration, chunk.CreationDate, chunk.IsLiveStreamChunk)
 		{ }
 
 		public string ExtractNumberFromFileName()

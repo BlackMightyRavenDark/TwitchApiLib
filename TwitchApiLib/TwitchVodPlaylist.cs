@@ -75,6 +75,8 @@ namespace TwitchApiLib
 					NumberFormatInfo numberFormatInfo = new NumberFormatInfo() { NumberDecimalSeparator = "." };
 
 					double chunkOffsetInPlaylist = 0.0;
+					DateTime chunkCreationDate = DateTime.MinValue;
+					double previousChunkLength = 0.0;
 					int foundChunks = 0;
 					for (int i = 0; i < strings.Length; ++i)
 					{
@@ -89,12 +91,31 @@ namespace TwitchApiLib
 							string[] chunkLengthSplitted = splitted[1].Split(',');
 
 							double chunkLength = double.TryParse(chunkLengthSplitted[0], NumberStyles.Any,
-								numberFormatInfo, out double d) ? d : 0.0;
+								numberFormatInfo, out double sec) ? sec : 0.0;
+							bool isLiveStreamchunk = chunkLengthSplitted.Length > 1 && chunkLengthSplitted[1] == "live";
+							if (ExtractProgramDateTimeFromString(strings[i - 1], out DateTime dateTime))
+							{
+								chunkCreationDate = dateTime;
+							}
+							else if (previousChunkLength > 0.0)
+							{
+								chunkCreationDate += TimeSpan.FromSeconds(previousChunkLength);
+							}
+
 							int chunkId = FirstChunkId + foundChunks;
-							TwitchVodChunk chunk = new TwitchVodChunk(chunkId, strings[i + 1], chunkOffsetInPlaylist, chunkLength);
+							bool isUrl = strings[i + 1].StartsWith("http");
+							string fileUrl = isUrl ? strings[i + 1] : $"{StreamRootUrl}/{strings[i + 1]}";
+							string fileName = isUrl ? $"{chunkId}.ts" : strings[i + 1];
+
+							TwitchVodChunk chunk = new TwitchVodChunk(chunkId, fileName, fileUrl,
+								chunkOffsetInPlaylist, chunkLength, chunkCreationDate, isLiveStreamchunk);
 							ChunkList.Add(chunk);
 
-							chunkOffsetInPlaylist += chunkLength;
+							if (chunkLength > 0.0)
+							{
+								chunkOffsetInPlaylist += chunkLength;
+							}
+							previousChunkLength = chunkLength;
 							foundChunks++;
 							i++;
 						}
@@ -103,6 +124,22 @@ namespace TwitchApiLib
 			}
 
 			return ChunkList.Count;
+		}
+
+		private static bool ExtractProgramDateTimeFromString(string inputString, out DateTime dateTime)
+		{
+			if (inputString.StartsWith("#EXT-X-PROGRAM-DATE-TIME:"))
+			{
+				string[] splitted = inputString.Split(new char[] { ':' }, 2);
+				if (DateTime.TryParseExact(splitted[1], "yyyy-MM-ddTHH:mm:ss.fffZ",
+					null, DateTimeStyles.AdjustToUniversal, out dateTime))
+				{
+					return true;
+				}
+			}
+
+			dateTime = DateTime.MaxValue;
+			return false;
 		}
 
 		public TwitchVodMutedSegments GetMutedSegments(bool showChunkCount = false)
