@@ -11,6 +11,7 @@ namespace TwitchApiLib
 		public string Codecs { get; }
 		public string FormatId { get; }
 		public string PlaylistUrl { get; }
+		public bool IsBestQuality { get; }
 		public TwitchVodPlaylist Playlist { get; set; }
 
 		public TwitchVodPlaylistManifestItem(int resolutionWidth, int resolutionHeight, int bandwidth,
@@ -23,6 +24,7 @@ namespace TwitchApiLib
 			Codecs = codecs;
 			FormatId = formatId;
 			PlaylistUrl = playlistUrl;
+			IsBestQuality = string.Equals(formatId, "chunked", StringComparison.OrdinalIgnoreCase);
 		}
 
 		public bool IsAudioOnly()

@@ -110,7 +110,7 @@ namespace TwitchApiLib
 
 		private bool GetHasBestQuality()
 		{
-			return Items != null && Items.Any(item => string.Equals(item.FormatId, "chunked", StringComparison.OrdinalIgnoreCase));
+			return Items != null && Items.Any(item => item.IsBestQuality);
 		}
 
 		public void SortByBandwidth()
@@ -121,8 +121,8 @@ namespace TwitchApiLib
 				{
 					if (x.Bandwidth == 0 || y.Bandwidth == 0)
 					{
-						if (string.Equals(x.FormatId, "chunked", StringComparison.OrdinalIgnoreCase)) { return -1; }
-						else if (string.Equals(y.FormatId, "chunked", StringComparison.OrdinalIgnoreCase)) { return 1; }
+						if (x.IsBestQuality) { return -1; }
+						else if (y.IsBestQuality) { return 1; }
 						else { return 0; }
 					}
 

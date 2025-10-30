@@ -80,7 +80,7 @@ namespace TwitchApiLib.StreamDumpTest
 							manifestResult.PlaylistManifest.SortByBandwidth();
 							TwitchVodPlaylistManifestItem item = manifestResult.PlaylistManifest[0];
 							Console.Write("Format ID: ");
-							if (item.FormatId == "chunked") { Console.ForegroundColor = ConsoleColor.Green; }
+							if (item.IsBestQuality) { Console.ForegroundColor = ConsoleColor.Green; }
 							Console.WriteLine(item.FormatId);
 							Console.ForegroundColor = ConsoleColor.Gray;
 							if (!item.IsAudioOnly())
