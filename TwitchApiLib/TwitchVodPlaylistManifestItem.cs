@@ -60,7 +60,8 @@ namespace TwitchApiLib
 
 		public override string ToString()
 		{
-			string t = $"Format ID: {FormatId}{Environment.NewLine}";
+			string t = $"Format ID: {FormatId}{Environment.NewLine}" +
+				$"The best quality: {(IsBestQuality ? "Yes" : "No")}{Environment.NewLine}";
 			if (!IsAudioOnly())
 			{
 				t += $"Resolution: {ResolutionWidth}x{ResolutionHeight}{Environment.NewLine}";
