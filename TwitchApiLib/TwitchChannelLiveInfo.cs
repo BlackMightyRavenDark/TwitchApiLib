@@ -22,7 +22,7 @@ namespace TwitchApiLib
 		public string[] Tags { get; }
 		public bool IsMature { get; }
 
-		public delegate bool HlsManifestGettingDelegate(object sender,
+		public delegate TwitchVodPlaylistManifestResult HlsManifestGettingDelegate(object sender,
 			string manifestUrl, FileDownloader downloader);
 
 		public TwitchChannelLiveInfo(
@@ -119,12 +119,16 @@ namespace TwitchApiLib
 			if (errorCode == 200)
 			{
 				bool ownDownloader = downloader == null;
-				if (ownDownloader)
+				if (ownDownloader) { downloader = Utils.MakeDefaultDownloader(); }
+				downloader.Url = manifestUrl;
+
+				TwitchVodPlaylistManifestResult manifestResult = manifestGetting?.Invoke(this, manifestUrl, downloader);
+				if (manifestResult != null)
 				{
-					downloader = Utils.MakeDefaultDownloader();
-					downloader.Url = manifestUrl;
+					if (ownDownloader) { downloader.Dispose(); }
+					return manifestResult;
 				}
-				manifestGetting?.Invoke(this, manifestUrl, downloader);
+
 				errorCode = Utils.DownloadString(downloader.Url, out string manifestText, downloader);
 				if (ownDownloader) { downloader.Dispose(); }
 				TwitchVodPlaylistManifest playlistManifest = errorCode == 200 ?

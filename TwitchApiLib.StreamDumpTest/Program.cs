@@ -70,8 +70,12 @@ namespace TwitchApiLib.StreamDumpTest
 					TwitchVodPlaylistManifestResult manifestResult = liveInfoResult.LiveInfo.GetHlsPlaylistManifest(
 						(s, url, downloader) =>
 						{
-							// Здесь можно настроить прокси-сервер для получения плейлиста максимального качества.
-							return true;
+							/*
+							 * Здесь можно настроить прокси-сервер для получения плейлиста максимального качества.
+							 * Можно скачать манифест вручную и вернуть его в качестве результата.
+							 * Если вернуть значение 'null', манифест будет скачан автоматически (будут использованы параметры объекта 'downloader').
+							 */
+							return null;
 						}, out string errorMessage);
 					if (manifestResult.ErrorCode == 200)
 					{
