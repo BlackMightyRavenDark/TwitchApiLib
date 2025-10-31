@@ -94,7 +94,8 @@ namespace TwitchApiLib.StreamDumpTest
 							Console.WriteLine($"Playlist URL: {item.PlaylistUrl}");
 
 							List<TwitchVodChunk> chunkList = new List<TwitchVodChunk>();
-							while (item.UpdatePlaylist() == 200)
+							string playlistErrorMessage;
+							while (item.UpdatePlaylist(out playlistErrorMessage) == 200)
 							{
 								Console.ForegroundColor = ConsoleColor.Gray;
 								Console.Write("Playlist is updated! New first chunk ID: ");
@@ -175,7 +176,8 @@ namespace TwitchApiLib.StreamDumpTest
 								}
 							}
 
-							Console.WriteLine("Playlist lost!");
+							Console.WriteLine(!string.IsNullOrEmpty(playlistErrorMessage) && !string.IsNullOrWhiteSpace(playlistErrorMessage) ?
+								$"Playlist lost! Error message: {playlistErrorMessage}" : "Playlist lost!");
 						}
 						else
 						{

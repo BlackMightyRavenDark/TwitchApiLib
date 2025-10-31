@@ -46,16 +46,26 @@ namespace TwitchApiLib
 			return new TwitchVodPlaylistResult(null, 400);
 		}
 
-		public int UpdatePlaylist()
+		public int UpdatePlaylist(out string errorMessage, bool autoParsePlaylist = true)
 		{
-			int errorCode = Utils.DownloadString(PlaylistUrl, out string playlistRawData);
+			int errorCode = Utils.DownloadString(PlaylistUrl, out string response);
 			if (errorCode == 200)
 			{
-				Playlist = new TwitchVodPlaylist(playlistRawData, PlaylistUrl, this);
-				Playlist.Parse();
+				errorMessage = null;
+				Playlist = new TwitchVodPlaylist(response, PlaylistUrl, this);
+				if (autoParsePlaylist) { Playlist.Parse(); }
 			}
-
+			else
+			{
+				errorMessage = response;
+			}
+			
 			return errorCode;
+		}
+
+		public int UpdatePlaylist()
+		{
+			return UpdatePlaylist(out _);
 		}
 
 		public override string ToString()
