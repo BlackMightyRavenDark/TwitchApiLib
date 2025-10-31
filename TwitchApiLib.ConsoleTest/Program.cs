@@ -64,7 +64,7 @@ namespace TwitchApiLib.ConsoleTest
 					Console.WriteLine($"Creation date: {twitchUserResult.User.CreationDate.FormatDateTime()}");
 					Console.WriteLine();
 
-					Console.WriteLine("Retrieving channel videos...");
+					Console.WriteLine("Receiving channel video list...");
 
 					MultiThreadedDownloaderLib.Utils.ConnectionLimit = 100;
 
