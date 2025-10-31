@@ -11,6 +11,7 @@ namespace TwitchApiLib
 		public string Codecs { get; }
 		public string FormatId { get; }
 		public string PlaylistUrl { get; }
+		public bool IsAudioOnly { get; }
 		public bool IsBestQuality { get; }
 		public TwitchVodPlaylist Playlist { get; set; }
 
@@ -24,12 +25,8 @@ namespace TwitchApiLib
 			Codecs = codecs;
 			FormatId = formatId;
 			PlaylistUrl = playlistUrl;
+			IsAudioOnly = !string.IsNullOrEmpty(FormatId) && FormatId.Contains("audio_only");
 			IsBestQuality = string.Equals(formatId, "chunked", StringComparison.OrdinalIgnoreCase);
-		}
-
-		public bool IsAudioOnly()
-		{
-			return !string.IsNullOrEmpty(FormatId) && FormatId.Contains("audio_only");
 		}
 
 		public TwitchVodPlaylistResult GetPlaylist()
@@ -72,7 +69,7 @@ namespace TwitchApiLib
 		{
 			string t = $"Format ID: {FormatId}{Environment.NewLine}" +
 				$"The best quality: {(IsBestQuality ? "Yes" : "No")}{Environment.NewLine}";
-			if (!IsAudioOnly())
+			if (!IsAudioOnly)
 			{
 				t += $"Resolution: {ResolutionWidth}x{ResolutionHeight}{Environment.NewLine}";
 				if (FrameRate > 0)

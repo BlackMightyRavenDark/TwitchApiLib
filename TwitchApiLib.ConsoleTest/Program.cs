@@ -138,7 +138,7 @@ namespace TwitchApiLib.ConsoleTest
 								{
 									TwitchVodPlaylistManifestItem item = vodResult.Vod.PlaylistManifest[i];
 									string url = item.PlaylistUrl ?? "<No URL found>";
-									string t = !item.IsAudioOnly() ? $"{item.ResolutionWidth}x{item.ResolutionHeight} | {item.FrameRate} fps" : item.FormatId;
+									string t = !item.IsAudioOnly ? $"{item.ResolutionWidth}x{item.ResolutionHeight} | {item.FrameRate} fps" : item.FormatId;
 									Console.WriteLine($"{t} | {url}");
 								}
 								if (!vodResult.Vod.PlaylistManifest.HasBestQuality)

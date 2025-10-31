@@ -100,12 +100,12 @@ namespace TwitchApiLib
 
 		public IEnumerable<TwitchVodPlaylistManifestItem> GetVideoItems()
 		{
-			return Items.Where(item => !item.IsAudioOnly());
+			return Items.Where(item => !item.IsAudioOnly);
 		}
 
 		public IEnumerable<TwitchVodPlaylistManifestItem> GetAudioItems()
 		{
-			return Items.Where(item => item.IsAudioOnly());
+			return Items.Where(item => item.IsAudioOnly);
 		}
 
 		private bool GetHasBestQuality()

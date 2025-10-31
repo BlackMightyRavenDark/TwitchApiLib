@@ -87,7 +87,7 @@ namespace TwitchApiLib.StreamDumpTest
 							if (item.IsBestQuality) { Console.ForegroundColor = ConsoleColor.Green; }
 							Console.WriteLine(item.FormatId);
 							Console.ForegroundColor = ConsoleColor.Gray;
-							if (!item.IsAudioOnly())
+							if (!item.IsAudioOnly)
 							{
 								Console.WriteLine($"Video: {item.ResolutionWidth}x{item.ResolutionHeight} | {item.FrameRate} fps");
 							}
