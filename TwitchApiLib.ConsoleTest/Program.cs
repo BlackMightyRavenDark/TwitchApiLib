@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TwitchApiLib.ConsoleTest
 {
@@ -68,7 +69,7 @@ namespace TwitchApiLib.ConsoleTest
 
 					MultiThreadedDownloaderLib.Utils.ConnectionLimit = 100;
 
-					List<TwitchVodResult> vods = twitchUserResult.User.GetVideosMultiThreaded(10U);
+					List<TwitchVodResult> vods = twitchUserResult.User.GetVideosMultiThreaded(10U).ToList();
 
 					if (vods.Count > 0)
 					{
