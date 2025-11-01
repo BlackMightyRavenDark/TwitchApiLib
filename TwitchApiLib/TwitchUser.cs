@@ -176,7 +176,7 @@ namespace TwitchApiLib
 			return GetVideos(0U);
 		}
 
-		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos,
+		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos, byte simultaneousThreads,
 			int millisecondsTimeout, CancellationToken cancellationToken = default)
 		{
 			List<TwitchVodResult> resultList = new List<TwitchVodResult>();
@@ -184,20 +184,29 @@ namespace TwitchApiLib
 			JArray jaRawVods = GetVideosRaw(maxVideos);
 			if (jaRawVods.Count > 0)
 			{
-				ConcurrentBag<TwitchVodResult> bag = new ConcurrentBag<TwitchVodResult>();
-				var tasks = jaRawVods.Select(j => Task.Run(() =>
-				{
-					TwitchVodResult vodResult = ParseVodInfo(j as JObject);
-					bag.Add(vodResult);
-				}));
+				if (simultaneousThreads <= 0) { simultaneousThreads = 2; }
 
-				if (millisecondsTimeout > 0)
+				ConcurrentBag<TwitchVodResult> bag = new ConcurrentBag<TwitchVodResult>();
+
+				for (int i = 0; i < jaRawVods.Count; i += simultaneousThreads)
 				{
-					Task.WhenAll(tasks).Wait(millisecondsTimeout, cancellationToken);
-				}
-				else
-				{
-					Task.WhenAll(tasks).Wait(cancellationToken);
+					var group = GetGroup(jaRawVods, i, simultaneousThreads);
+					if (group.Count() == 0) { break; }
+
+					var tasks = group.Select(jVod => Task.Run(() =>
+					{
+						TwitchVodResult vodResult = ParseVodInfo(jVod);
+						bag.Add(vodResult);
+					}));
+
+					if (millisecondsTimeout > 0)
+					{
+						Task.WhenAll(tasks).Wait(millisecondsTimeout, cancellationToken);
+					}
+					else
+					{
+						Task.WhenAll(tasks).Wait(cancellationToken);
+					}
 				}
 
 				if (bag.Count > 0)
@@ -212,14 +221,20 @@ namespace TwitchApiLib
 			return resultList;
 		}
 
-		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos, CancellationToken cancellationToken)
+		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos, byte simultaneousThreads,
+			CancellationToken cancellationToken)
 		{
-			return GetVideosMultiThreaded(maxVideos, 0, cancellationToken);
+			return GetVideosMultiThreaded(maxVideos, simultaneousThreads, 0, cancellationToken);
 		}
 
-		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos)
+		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos, CancellationToken cancellationToken)
 		{
-			return GetVideosMultiThreaded(maxVideos, 0, default);
+			return GetVideosMultiThreaded(maxVideos, 5, cancellationToken);
+		}
+
+		public List<TwitchVodResult> GetVideosMultiThreaded(uint maxVideos, byte simultaneousThreads = 5)
+		{
+			return GetVideosMultiThreaded(maxVideos, simultaneousThreads, default);
 		}
 
 		public bool UpdateLiveStreamInfo(out TwitchChannelLiveInfoResult channelLiveInfoResult)
@@ -250,6 +265,15 @@ namespace TwitchApiLib
 
 			result = ParseTwitchUserInfo(rawUserInfo);
 			return result != null ? 200 : 400;
+		}
+
+		private static IEnumerable<JObject> GetGroup(JArray sourceArray, int startId, int groupSize)
+		{
+			int lastId = startId + groupSize - 1;
+			for (int i = startId; i <= lastId && i < sourceArray.Count; ++i)
+			{
+				yield return sourceArray[i] as JObject;
+			}
 		}
 	}
 }
