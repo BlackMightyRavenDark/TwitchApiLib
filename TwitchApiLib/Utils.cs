@@ -45,27 +45,6 @@ namespace TwitchApiLib
 			return new TwitchVodResult(null, errorCode, null, response);
 		}
 
-		internal static TwitchVodPageResult GetChannelVideosPage(
-			string channelId, uint maxVideos, string pageToken = null)
-		{
-			TwitchApplication application = GetApplication();
-			int errorCode = GetHelixOauthToken(application, out string token);
-			if (errorCode == 200)
-			{
-				string url = GenerateChannelVideosRequestUrl(channelId, maxVideos, pageToken);
-				FileDownloader d = MakeTwitchApiBearerClient(application.ClientId, token);
-				d.Url = url;
-				errorCode = d.DownloadString(out string response);
-				d.Dispose();
-
-				if (errorCode == 200)
-				{
-					return new TwitchVodPageResult(new TwitchVodPage(response), errorCode);
-				}
-			}
-			return new TwitchVodPageResult(null, errorCode);
-		}
-
 		public static TwitchUser ParseTwitchUserInfo(JObject json)
 		{
 			JArray jaData = json.Value<JArray>("data");
@@ -752,7 +731,7 @@ namespace TwitchApiLib
 			return errorCode;
 		}
 
-		private static FileDownloader MakeTwitchApiBearerClient(string clientId, string bearerAuthorizationToken)
+		internal static FileDownloader MakeTwitchApiBearerClient(string clientId, string bearerAuthorizationToken)
 		{
 			FileDownloader d = MakeDefaultDownloader();
 			d.Headers.Add("Client-ID", clientId);

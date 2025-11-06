@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using MultiThreadedDownloaderLib;
+using static TwitchApiLib.TwitchApi;
+using static TwitchApiLib.Utils;
 
 namespace TwitchApiLib
 {
@@ -17,14 +20,29 @@ namespace TwitchApiLib
 
 		public static TwitchVodPageResult Get(ulong userId, uint maxVideos, string pageToken = null)
 		{
-			return Utils.GetChannelVideosPage(userId.ToString(), maxVideos, pageToken);
+			TwitchApplication application = GetApplication();
+			int errorCode = GetHelixOauthToken(application, out string token);
+			if (errorCode == 200)
+			{
+				string url = GenerateChannelVideosRequestUrl(userId.ToString(), maxVideos, pageToken);
+				FileDownloader d = MakeTwitchApiBearerClient(application.ClientId, token);
+				d.Url = url;
+				errorCode = d.DownloadString(out string response);
+				d.Dispose();
+
+				if (errorCode == 200)
+				{
+					return new TwitchVodPageResult(new TwitchVodPage(response), errorCode);
+				}
+			}
+			return new TwitchVodPageResult(null, errorCode);
 		}
 
 		public string GetNextPageToken()
 		{
 			if (_nextPageToken == null)
 			{
-				JObject json = Utils.TryParseJson(RawData);
+				JObject json = TryParseJson(RawData);
 				if (json != null)
 				{
 					JToken jt = json.Value<JToken>("pagination");
@@ -54,7 +72,7 @@ namespace TwitchApiLib
 
 		public int Parse()
 		{
-			JObject json = Utils.TryParseJson(RawData);
+			JObject json = TryParseJson(RawData);
 			if (json != null)
 			{
 				VodList = new List<TwitchVodResult>();
@@ -63,7 +81,7 @@ namespace TwitchApiLib
 				{
 					foreach (JObject jVod in jaData.Cast<JObject>())
 					{
-						TwitchVodResult vodResult = Utils.ParseVodInfo(jVod);
+						TwitchVodResult vodResult = ParseVodInfo(jVod);
 						VodList.Add(vodResult);
 					}
 				}
