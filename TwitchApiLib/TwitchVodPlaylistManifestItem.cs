@@ -29,6 +29,24 @@ namespace TwitchApiLib
 			IsBestQuality = string.Equals(formatId, "chunked", StringComparison.OrdinalIgnoreCase);
 		}
 
+		public static TwitchVodPlaylistManifestItemResult Get(TwitchVod vod, string formatId)
+		{
+			TwitchVodPlaylistManifestResult manifestResult = TwitchVodPlaylistManifest.Get(vod);
+			if (manifestResult.ErrorCode == 200)
+			{
+				if (manifestResult.PlaylistManifest.Parse() > 0)
+				{
+					TwitchVodPlaylistManifestItem item = manifestResult.PlaylistManifest[formatId];
+					int errorCode = item != null ? 200 : 404;
+					return new TwitchVodPlaylistManifestItemResult(item, errorCode);
+				}
+
+				return new TwitchVodPlaylistManifestItemResult(null, 204);
+			}
+
+			return new TwitchVodPlaylistManifestItemResult(null, manifestResult.ErrorCode);
+		}
+
 		public TwitchVodPlaylistResult GetPlaylist()
 		{
 			if (!string.IsNullOrEmpty(PlaylistUrl) && !string.IsNullOrWhiteSpace(PlaylistUrl))
