@@ -16,35 +16,6 @@ namespace TwitchApiLib
 
 		public static readonly TwitchHelixOauthToken TwitchHelixOauthToken = new TwitchHelixOauthToken();
 
-		internal static TwitchVodResult GetTwitchVodInfo(ulong vodId)
-		{
-			string url = GenerateVodInfoRequestUrl(vodId);
-			int errorCode = HttpGet_Helix(url, out string response);
-			if (errorCode == 200)
-			{
-				JObject json = TryParseJson(response, out string parsingResult);
-				if (json == null)
-				{
-					return new TwitchVodResult(null, 400, parsingResult, response);
-				}
-
-				JArray jaData = json.Value<JArray>("data");
-				if (jaData == null)
-				{
-					return new TwitchVodResult(null, 204, "'data' not found", response);
-				}
-
-				if (jaData.Count == 0)
-				{
-					return new TwitchVodResult(null, 204, "The 'data' is empty", response);
-				}
-
-				return ParseVodInfo(jaData[0] as JObject);
-			}
-
-			return new TwitchVodResult(null, errorCode, null, response);
-		}
-
 		public static TwitchUser ParseTwitchUserInfo(JObject json)
 		{
 			JArray jaData = json.Value<JArray>("data");

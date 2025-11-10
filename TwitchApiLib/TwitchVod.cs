@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 using static TwitchApiLib.TwitchApi;
 
@@ -70,7 +71,31 @@ namespace TwitchApiLib
 
 		public static TwitchVodResult Get(ulong vodId)
 		{
-			return Utils.GetTwitchVodInfo(vodId);
+			string url = Utils.GenerateVodInfoRequestUrl(vodId);
+			int errorCode = Utils.HttpGet_Helix(url, out string response);
+			if (errorCode == 200)
+			{
+				JObject json = Utils.TryParseJson(response, out string parsingResult);
+				if (json == null)
+				{
+					return new TwitchVodResult(null, 400, parsingResult, response);
+				}
+
+				JArray jaData = json.Value<JArray>("data");
+				if (jaData == null)
+				{
+					return new TwitchVodResult(null, 204, "'data' not found", response);
+				}
+
+				if (jaData.Count == 0)
+				{
+					return new TwitchVodResult(null, 204, "The 'data' is empty", response);
+				}
+
+				return Utils.ParseVodInfo(jaData[0] as JObject);
+			}
+
+			return new TwitchVodResult(null, errorCode, null, response);
 		}
 
 		private bool GetIsLive()
