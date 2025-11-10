@@ -81,7 +81,7 @@ namespace TwitchApiLib
 				{
 					foreach (JObject jVod in jaData.Cast<JObject>())
 					{
-						TwitchVodResult vodResult = ParseVodInfo(jVod);
+						TwitchVodResult vodResult = TwitchVod.Parse(jVod);
 						VodList.Add(vodResult);
 					}
 				}

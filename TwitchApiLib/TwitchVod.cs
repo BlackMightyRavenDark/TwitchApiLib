@@ -92,10 +92,88 @@ namespace TwitchApiLib
 					return new TwitchVodResult(null, 204, "The 'data' is empty", response);
 				}
 
-				return Utils.ParseVodInfo(jaData[0] as JObject);
+				return Parse(jaData[0] as JObject);
 			}
 
 			return new TwitchVodResult(null, errorCode, null, response);
+		}
+
+		public static TwitchVodResult Parse(JObject vodInfo)
+		{
+			try
+			{
+				ulong vodId = vodInfo.Value<ulong>("id");
+				JToken jt = vodInfo.Value<JToken>("stream_id");
+				ulong streamId = jt != null && jt.Type != JTokenType.Null ? jt.Value<ulong>() : 0U;
+				string userLogin = vodInfo.Value<string>("user_login");
+				string title = vodInfo.Value<string>("title");
+				string description = vodInfo.Value<string>("description");
+				string createdAt = vodInfo.Value<string>("created_at");
+				DateTime creationDate = Utils.ParseDateTime(createdAt);
+				string publishedAt = vodInfo.Value<string>("published_at");
+				DateTime publishedDate = Utils.ParseDateTime(publishedAt);
+				string url = vodInfo.Value<string>("url");
+				string thumbnailTemplateUrl = vodInfo.Value<string>("thumbnail_url");
+				string viewable = vodInfo.Value<string>("viewable");
+				ulong viewCount = vodInfo.Value<ulong>("view_count");
+				string language = vodInfo.Value<string>("language");
+				string vodTypeString = vodInfo.Value<string>("type");
+
+				TwitchVodType vodType = Utils.GetVodType(vodTypeString);
+
+				TimeSpan duration = TimeSpan.Zero;
+
+				TwitchUserResult twitchUserResult = TwitchUser.Get(userLogin);
+				DateTime deletionDeletion = DateTime.MaxValue;
+				if (vodType == TwitchVodType.Archive && twitchUserResult.ErrorCode == 200 && twitchUserResult.User != null)
+				{
+					bool isPartner = twitchUserResult.User.BroadcasterType == TwitchBroadcasterType.Partner;
+					deletionDeletion = creationDate.AddDays(isPartner ? 60.0 : 14.0);
+				}
+
+				TwitchGame game;
+				TwitchVideoMetadataResult videoMetadataResult = TwitchApiGql.GetVodMetadata(vodId.ToString(), userLogin);
+				if (videoMetadataResult.ErrorCode == 200)
+				{
+					int seconds = videoMetadataResult.Metadata.GetVideoLengthSeconds();
+					if (seconds > 0)
+					{
+						duration = TimeSpan.FromSeconds(seconds);
+					}
+
+					game = videoMetadataResult.Metadata.GetGameInfo();
+				}
+				else
+				{
+					game = TwitchGame.CreateUnknownGame();
+				}
+
+				TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetVodPlaybackAccessMode(vodId.ToString(), out _);
+
+				TwitchVod vod = new TwitchVod(vodId, title, description, duration, game, creationDate,
+					publishedDate, deletionDeletion, url, thumbnailTemplateUrl, viewable, viewCount,
+					language, vodType, playbackAccessMode, streamId, twitchUserResult.User,
+					null, vodInfo.ToString(), videoMetadataResult.Metadata);
+				if (vod.UpdatePlaylistManifest() == 200 && vod.PlaylistManifest.Count > 0)
+				{
+					vod.PlaylistManifest[0].UpdatePlaylist();
+				}
+
+				return new TwitchVodResult(vod, 200, null, vodInfo.ToString());
+			}
+			catch (Exception ex)
+			{
+#if DEBUG
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+#endif
+				return new TwitchVodResult(null, ex.HResult, ex.Message, vodInfo?.ToString());
+			}
+		}
+
+		public static TwitchVodResult Parse(string rawVodInfo)
+		{
+			JObject json = Utils.TryParseJson(rawVodInfo, out string errorMessage);
+			return json != null ? Parse(json) : new TwitchVodResult(null, 400, errorMessage, rawVodInfo);
 		}
 
 		private bool GetIsLive()

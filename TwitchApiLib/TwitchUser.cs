@@ -158,7 +158,7 @@ namespace TwitchApiLib
 			uint vodCount = 0;
 			foreach (JObject jVod in jaRawVods.Cast<JObject>())
 			{
-				TwitchVodResult vodResult = ParseVodInfo(jVod);
+				TwitchVodResult vodResult = TwitchVod.Parse(jVod);
 				yield return vodResult;
 				vodCount++;
 
@@ -188,7 +188,7 @@ namespace TwitchApiLib
 
 				var tasks = group.Select(jVod => Task.Run(() =>
 				{
-					TwitchVodResult vodResult = ParseVodInfo(jVod);
+					TwitchVodResult vodResult = TwitchVod.Parse(jVod);
 					bag.Add(vodResult);
 				}));
 
