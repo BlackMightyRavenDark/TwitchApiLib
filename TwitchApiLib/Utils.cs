@@ -467,41 +467,10 @@ namespace TwitchApiLib
 			return GetVodPlaylistManifestUrl(vod.Id, vod.IsSubscribersOnly, out playListManifestUrl);
 		}
 
-		public static TwitchVodPlaylistManifestResult GetVodPlaylistManifest(string vodId, bool isSubscribersOnly)
-		{
-			if (isSubscribersOnly)
-			{
-				return new TwitchVodPlaylistManifestResult(null, 403);
-			}
-
-			int errorCode = GetVodPlaylistManifestUrl(vodId, false, out string playlistManifestUrl);
-			if (errorCode == 200)
-			{
-				errorCode = DownloadString(playlistManifestUrl, out string manifestRaw);
-				if (errorCode == 200)
-				{
-					TwitchVodPlaylistManifest playlistManifest = new TwitchVodPlaylistManifest(manifestRaw);
-					return new TwitchVodPlaylistManifestResult(playlistManifest, 200);
-				}
-			}
-
-			return new TwitchVodPlaylistManifestResult(null, errorCode);
-		}
-
-		public static TwitchVodPlaylistManifestResult GetVodPlaylistManifest(ulong vodId, bool isSubscribersOnly)
-		{
-			return GetVodPlaylistManifest(vodId.ToString(), isSubscribersOnly);
-		}
-
-		public static TwitchVodPlaylistManifestResult GetVodPlaylistManifest(TwitchVod vod)
-		{
-			return GetVodPlaylistManifest(vod.Id.ToString(), vod.IsSubscribersOnly);
-		}
-
 		public static TwitchVodPlaylistManifestItemResult GetVodPlaylistManifestItem(
 			TwitchVod vod, string formatId)
 		{
-			TwitchVodPlaylistManifestResult manifestResult = GetVodPlaylistManifest(vod);
+			TwitchVodPlaylistManifestResult manifestResult = TwitchVodPlaylistManifest.Get(vod);
 			if (manifestResult.ErrorCode == 200)
 			{
 				if (manifestResult.PlaylistManifest.Parse() > 0)

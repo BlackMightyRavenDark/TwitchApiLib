@@ -91,7 +91,7 @@ namespace TwitchApiLib
 
 		public TwitchVodPlaylistManifestResult GetPlaylistManifest()
 		{
-			return Utils.GetVodPlaylistManifest(this);
+			return TwitchVodPlaylistManifest.Get(this);
 		}
 
 		public TwitchVodPlaylistResult GetPlaylist(string formatId)
