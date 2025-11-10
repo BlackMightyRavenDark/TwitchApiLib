@@ -56,7 +56,7 @@ namespace TwitchApiLib
 			{
 				errorMessage = response;
 			}
-			
+
 			return errorCode;
 		}
 
