@@ -18,49 +18,6 @@ namespace TwitchApiLib
 		public const string TWITCH_USHER_VOD_URL_TEMPLATE = "https://usher.ttvnw.net/vod/{0}.m3u8";
 		public const string TWITCH_USHER_HLS_URL_TEMPLATE = "https://usher.ttvnw.net/api/channel/hls/{0}.m3u8";
 
-		public static TwitchVideoMetadataResult GetVodMetadata(string vodId, string channelLogin)
-		{
-			JArray body = GenerateVodInfoRequestBody(vodId, channelLogin);
-			int errorCode = Utils.HttpPost(TWITCH_GQL_API_URL, body.ToString(), out string response);
-			if (errorCode == 200 && Utils.TryParseJsonArray(response, out _) == null)
-			{
-				errorCode = 400;
-			}
-
-			return new TwitchVideoMetadataResult(new TwitchVideoMetadata(response), errorCode);
-		}
-
-		public static JArray GenerateVodInfoRequestBody(string vodId, string channelLogin)
-		{
-			const string hashValue = "cb3b1eb2f2d2b2f65b8389ba446ec521d76c3aa44f5424a1b1d235fe21eb4806";
-			JObject jPersistedQuery = new JObject()
-			{
-				["version"] = 1,
-				["sha256Hash"] = hashValue
-			};
-
-			JObject jExtensions = new JObject()
-			{
-				["persistedQuery"] = jPersistedQuery
-			};
-
-			JObject jVariables = new JObject()
-			{
-				["channelLogin"] = channelLogin,
-				["videoID"] = vodId
-			};
-
-			JObject json = new JObject()
-			{
-				["operationName"] = "VideoMetadata",
-				["variables"] = jVariables,
-				["extensions"] = jExtensions
-			};
-
-			JArray jArray = new JArray() { json };
-			return jArray;
-		}
-
 		public static JObject GenerateVodGameInfoRequestBody(string vodId)
 		{
 			const string hashValue = "38bbbbd9ae2e0150f335e208b05cf09978e542b464a78c2d4952673cd02ea42b";

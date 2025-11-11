@@ -30,7 +30,6 @@ namespace TwitchApiLib
 		public TwitchVodPlaylist Playlist => PlaylistManifest != null && PlaylistManifest.Count > 0 ? PlaylistManifest[0].Playlist : null;
 		public TwitchVodPlaylistManifest PlaylistManifest { get; private set; }
 		public string RawData { get; }
-		public TwitchVideoMetadata RawMetadata { get; }
 		public bool IsHighlight => VodType == TwitchVodType.Highlight;
 		public bool IsUpload => VodType == TwitchVodType.Upload;
 		public bool IsSubscribersOnly => PlaybackAccessMode == TwitchPlaybackAccessMode.SubscribersOnly;
@@ -39,8 +38,7 @@ namespace TwitchApiLib
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
 			string url, string thumbnailUrlTemplate, string viewable, ulong viewCount,
 			string language, TwitchVodType vodType, TwitchPlaybackAccessMode playbackAccessMode,
-			ulong streamId, TwitchUser user, string playlistUrl,
-			string rawData, TwitchVideoMetadata rawMetadata)
+			ulong streamId, TwitchUser user, string rawData)
 		{
 			Id = id;
 			Title = title;
@@ -61,7 +59,6 @@ namespace TwitchApiLib
 			StreamId = streamId;
 			User = user;
 			RawData = rawData;
-			RawMetadata = rawMetadata;
 		}
 
 		public void Dispose()
@@ -131,29 +128,14 @@ namespace TwitchApiLib
 					deletionDeletion = creationDate.AddDays(isPartner ? 60.0 : 14.0);
 				}
 
-				TwitchGame game;
-				TwitchVideoMetadataResult videoMetadataResult = TwitchApiGql.GetVodMetadata(vodId.ToString(), userLogin);
-				if (videoMetadataResult.ErrorCode == 200)
-				{
-					int seconds = videoMetadataResult.Metadata.GetVideoLengthSeconds();
-					if (seconds > 0)
-					{
-						duration = TimeSpan.FromSeconds(seconds);
-					}
-
-					game = videoMetadataResult.Metadata.GetGameInfo();
-				}
-				else
-				{
-					game = TwitchGame.CreateUnknownGame();
-				}
+				TwitchGame game = TwitchGame.CreateUnknownGame();
 
 				TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetVodPlaybackAccessMode(vodId.ToString(), out _);
 
 				TwitchVod vod = new TwitchVod(vodId, title, description, duration, game, creationDate,
 					publishedDate, deletionDeletion, url, thumbnailTemplateUrl, viewable, viewCount,
 					language, vodType, playbackAccessMode, streamId, twitchUserResult.User,
-					null, vodInfo.ToString(), videoMetadataResult.Metadata);
+					vodInfo.ToString());
 				if (vod.UpdatePlaylistManifest() == 200 && vod.PlaylistManifest.Count > 0)
 				{
 					vod.PlaylistManifest[0].UpdatePlaylist();
