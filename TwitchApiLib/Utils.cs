@@ -16,39 +16,6 @@ namespace TwitchApiLib
 
 		public static readonly TwitchHelixOauthToken TwitchHelixOauthToken = new TwitchHelixOauthToken();
 
-		public static TwitchUser ParseTwitchUserInfo(JObject json)
-		{
-			JArray jaData = json.Value<JArray>("data");
-			if (jaData == null || jaData.Count == 0)
-			{
-				return null;
-			}
-
-			ulong userId = jaData[0].Value<ulong>("id");
-			string userLogin = jaData[0].Value<string>("login");
-			string displayName = jaData[0].Value<string>("display_name");
-			string userType = jaData[0].Value<string>("type");
-			string broadcasterTypeString = jaData[0].Value<string>("broadcaster_type");
-			string description = jaData[0].Value<string>("description");
-			string profileImageUrl = jaData[0].Value<string>("profile_image_url");
-			string offlineImageUrl = jaData[0].Value<string>("offline_image_url");
-			ulong viewCount = jaData[0].Value<ulong>("view_count");
-			string createdAt = jaData[0].Value<string>("created_at");
-			DateTime creationDate = ParseDateTime(createdAt);
-
-			TwitchBroadcasterType broadcasterType = GetBroadcasterType(broadcasterTypeString);
-			TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetChannelPlaybackAccessMode(userLogin, out _);
-
-			return new TwitchUser(userId, userLogin, displayName, userType, broadcasterType, playbackAccessMode,
-				description, profileImageUrl, offlineImageUrl, viewCount, creationDate, json.ToString());
-		}
-
-		public static TwitchUser ParseTwitchUserInfo(string rawData)
-		{
-			JObject json = TryParseJson(rawData);
-			return json != null ? ParseTwitchUserInfo(json) : null;
-		}
-
 		public static TwitchChannelLiveInfo ParseChannelLiveInfo(JObject liveInfo)
 		{
 			try
@@ -207,7 +174,7 @@ namespace TwitchApiLib
 			return errorCode;
 		}
 
-		private static TwitchBroadcasterType GetBroadcasterType(string broadcasterType)
+		internal static TwitchBroadcasterType GetBroadcasterType(string broadcasterType)
 		{
 			if (string.IsNullOrEmpty(broadcasterType) || string.IsNullOrWhiteSpace(broadcasterType))
 			{

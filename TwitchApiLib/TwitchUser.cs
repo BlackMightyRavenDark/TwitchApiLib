@@ -59,14 +59,14 @@ namespace TwitchApiLib
 			int errorCode = FindRawUserInfo(userLogin, out JObject response);
 			if (errorCode == 200)
 			{
-				errorCode = ParseRawUserInfo(response, out TwitchUser user);
-				if (errorCode == 200)
+				TwitchUserResult userResult = ParseUserSearchResult(response);
+				if (userResult.ErrorCode == 200)
 				{
-					_twitchUserLogins[userLogin] = user;
-					_twitchUserIds[user.Id] = user;
-				}
+					_twitchUserLogins[userLogin] = userResult.User;
+					_twitchUserIds[userResult.User.Id] = userResult.User;
 
-				return new TwitchUserResult(user, errorCode);
+					return userResult;
+				}
 			}
 
 			return new TwitchUserResult(null, errorCode);
@@ -83,14 +83,14 @@ namespace TwitchApiLib
 			int errorCode = FindRawUserInfo(userId, out JObject response);
 			if (errorCode == 200)
 			{
-				errorCode = ParseRawUserInfo(response, out TwitchUser user);
-				if (errorCode == 200)
+				TwitchUserResult userResult = ParseUserSearchResult(response);
+				if (userResult.ErrorCode == 200)
 				{
-					_twitchUserLogins[user.Login] = user;
-					_twitchUserIds[userId] = user;
-				}
+					_twitchUserLogins[userResult.User.Login] = userResult.User;
+					_twitchUserIds[userId] = userResult.User;
 
-				return new TwitchUserResult(user, errorCode);
+					return userResult;
+				}
 			}
 
 			return new TwitchUserResult(null, errorCode);
@@ -239,22 +239,43 @@ namespace TwitchApiLib
 			return UpdateLiveStreamInfo(out _);
 		}
 
-		private static bool IsUserExists(JObject searchResultsJson)
+		public static TwitchUserResult Parse(JObject json)
 		{
-			JArray jaData = searchResultsJson.Value<JArray>("data");
-			return jaData != null && jaData.Count > 0;
+			ulong userId = json.Value<ulong>("id");
+			string userLogin = json.Value<string>("login");
+			string displayName = json.Value<string>("display_name");
+			string userType = json.Value<string>("type");
+			string broadcasterTypeString = json.Value<string>("broadcaster_type");
+			string description = json.Value<string>("description");
+			string profileImageUrl = json.Value<string>("profile_image_url");
+			string offlineImageUrl = json.Value<string>("offline_image_url");
+			ulong viewCount = json.Value<ulong>("view_count");
+			string createdAt = json.Value<string>("created_at");
+			DateTime creationDate = ParseDateTime(createdAt);
+
+			TwitchBroadcasterType broadcasterType = GetBroadcasterType(broadcasterTypeString);
+			TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetChannelPlaybackAccessMode(userLogin, out _);
+
+			TwitchUser user = new TwitchUser(userId, userLogin, displayName, userType, broadcasterType, playbackAccessMode,
+				description, profileImageUrl, offlineImageUrl, viewCount, creationDate, json.ToString());
+			return new TwitchUserResult(user, 200);
 		}
 
-		public static int ParseRawUserInfo(JObject rawUserInfo, out TwitchUser result)
+		public static TwitchUserResult Parse(string rawData)
 		{
-			if (!IsUserExists(rawUserInfo))
+			JObject json = TryParseJson(rawData);
+			return json != null ? Parse(json) : new TwitchUserResult(null, 400);
+		}
+
+		public static TwitchUserResult ParseUserSearchResult(JObject searchResult)
+		{
+			JArray jaData = searchResult?.Value<JArray>("data");
+			if (jaData == null || jaData.Count == 0)
 			{
-				result = null;
-				return 404;
+				return new TwitchUserResult(null, 404);
 			}
 
-			result = ParseTwitchUserInfo(rawUserInfo);
-			return result != null ? 200 : 400;
+			return Parse(jaData[0] as JObject);
 		}
 
 		private static IEnumerable<JObject> GetGroup(JArray sourceArray, int startId, int groupSize)
