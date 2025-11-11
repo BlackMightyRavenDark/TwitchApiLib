@@ -121,11 +121,11 @@ namespace TwitchApiLib
 				TimeSpan duration = TimeSpan.Zero;
 
 				TwitchUserResult twitchUserResult = TwitchUser.Get(userLogin);
-				DateTime deletionDeletion = DateTime.MaxValue;
+				DateTime deletionDate = DateTime.MaxValue;
 				if (vodType == TwitchVodType.Archive && twitchUserResult.ErrorCode == 200 && twitchUserResult.User != null)
 				{
 					bool isPartner = twitchUserResult.User.BroadcasterType == TwitchBroadcasterType.Partner;
-					deletionDeletion = creationDate.AddDays(isPartner ? 60.0 : 14.0);
+					deletionDate = creationDate.AddDays(isPartner ? 60.0 : 14.0);
 				}
 
 				TwitchGame game = TwitchGame.CreateUnknownGame();
@@ -133,7 +133,7 @@ namespace TwitchApiLib
 				TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetVodPlaybackAccessMode(vodId.ToString(), out _);
 
 				TwitchVod vod = new TwitchVod(vodId, title, description, duration, game, creationDate,
-					publishedDate, deletionDeletion, url, thumbnailTemplateUrl, viewable, viewCount,
+					publishedDate, deletionDate, url, thumbnailTemplateUrl, viewable, viewCount,
 					language, vodType, playbackAccessMode, streamId, twitchUserResult.User,
 					vodInfo.ToString());
 				if (vod.UpdatePlaylistManifest() == 200 && vod.PlaylistManifest.Count > 0)
