@@ -26,7 +26,7 @@ namespace TwitchApiLib
 		public bool IsLive { get; }
 		public ulong StreamId { get; }
 		public TwitchUser User { get; }
-		public Stream PreviewImageData { get; private set; }
+		public Stream ThumbnailImageData { get; private set; }
 		public TwitchVodPlaylist Playlist => PlaylistManifest != null && PlaylistManifest.Count > 0 ? PlaylistManifest[0].Playlist : null;
 		public TwitchVodPlaylistManifest PlaylistManifest { get; private set; }
 		public string RawData { get; }
@@ -63,7 +63,7 @@ namespace TwitchApiLib
 
 		public void Dispose()
 		{
-			DisposePreviewImageData();
+			DisposeThumbnailImageData();
 		}
 
 		public static TwitchVodResult Get(ulong vodId)
@@ -237,9 +237,9 @@ namespace TwitchApiLib
 			return Playlist?.GetMutedSegments(showChunkCount);
 		}
 
-		public int RetrievePreviewImage(ushort width, ushort height)
+		public int ReceiveThumbnail(ushort width, ushort height)
 		{
-			if (PreviewImageData != null) { return 200; }
+			if (ThumbnailImageData != null) { return 200; }
 
 			if (string.IsNullOrEmpty(ThumbnailUrlTemplate) ||
 				string.IsNullOrWhiteSpace(ThumbnailUrlTemplate))
@@ -253,10 +253,10 @@ namespace TwitchApiLib
 			{
 				int timeout = GetConnectionTimeout();
 				FileDownloader d = new FileDownloader() { Url = url, ConnectionTimeout = timeout };
-				PreviewImageData = new MemoryStream();
-				int errorCode = d.Download(PreviewImageData);
+				ThumbnailImageData = new MemoryStream();
+				int errorCode = d.Download(ThumbnailImageData);
 
-				if (errorCode != 200) { DisposePreviewImageData(); }
+				if (errorCode != 200) { DisposeThumbnailImageData(); }
 
 				return errorCode;
 			}
@@ -264,12 +264,12 @@ namespace TwitchApiLib
 			return 400;
 		}
 
-		public void DisposePreviewImageData()
+		public void DisposeThumbnailImageData()
 		{
-			if (PreviewImageData != null)
+			if (ThumbnailImageData != null)
 			{
-				PreviewImageData.Close();
-				PreviewImageData = null;
+				ThumbnailImageData.Close();
+				ThumbnailImageData = null;
 			}
 		}
 	}
