@@ -10,13 +10,13 @@ namespace TwitchApiLib
 		public string DisplayName { get; }
 		public ulong Id { get; }
 		public string BoxArtUrl { get; }
-		public string ActualPreviewImageUrl { get; private set; }
+		public string ActualThumbnailUrl { get; private set; }
 		public bool IsKnown => Id > 0UL;
-		public Stream PreviewImageData { get; private set; }
+		public Stream ThumbnailImageData { get; private set; }
 		public string RawData { get; }
 
-		public const string GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>_IGDB-<width>x<height>.jpg";
-		public const string NON_GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>-<width>x<height>.jpg";
+		public const string GAME_THUMBNAIL_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>_IGDB-<width>x<height>.jpg";
+		public const string NON_GAME_THUMBNAIL_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>-<width>x<height>.jpg";
 		public const string UNKNOWN_GAME_BOXART_URL = "https://static-cdn.jtvnw.net/ttv-boxart/404_boxart.png";
 
 		public TwitchGame(string title, string displayName, ulong id,
@@ -26,13 +26,13 @@ namespace TwitchApiLib
 			DisplayName = displayName;
 			Id = id;
 			BoxArtUrl = boxArtUrl;
-			ActualPreviewImageUrl = boxArtUrl;
+			ActualThumbnailUrl = boxArtUrl;
 			RawData = rawData;
 		}
 
 		public void Dispose()
 		{
-			DisposePreviewImageData();
+			DisposeThumbnailImageData();
 		}
 
 		public static TwitchGame CreateUnknownGame()
@@ -40,34 +40,33 @@ namespace TwitchApiLib
 			return new TwitchGame(null, null, 0UL, UNKNOWN_GAME_BOXART_URL, null);
 		}
 
-		public int RetrievePreviewImage(string imageUrl)
+		public int ReceiveThumbnail(string imageUrl)
 		{
-			if (PreviewImageData != null) { return 200; }
+			if (ThumbnailImageData != null) { return 200; }
 
-			ActualPreviewImageUrl = imageUrl;
-			PreviewImageData = new MemoryStream();
+			ActualThumbnailUrl = imageUrl;
+			ThumbnailImageData = new MemoryStream();
 
 			int timeout = TwitchApi.GetConnectionTimeout();
 			FileDownloader d = new FileDownloader() { Url = imageUrl, ConnectionTimeout = timeout };
-			int errorCode = d.Download(PreviewImageData);
-
-			if (errorCode != 200) { DisposePreviewImageData(); }
-
+			int errorCode = d.Download(ThumbnailImageData);
 			d.Dispose();
+
+			if (errorCode != 200) { DisposeThumbnailImageData(); }
 
 			return errorCode;
 		}
 
-		public int RetrievePreviewImage(ushort width, ushort height)
+		public int ReceiveThumbnail(ushort width, ushort height)
 		{
-			if (PreviewImageData != null) { return 200; }
+			if (ThumbnailImageData != null) { return 200; }
 
 			string url = BoxArtUrl;
 			if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
 			{
 				if (IsKnown)
 				{
-					url = FormatPreviewImageTemplateUrl(Id, width, height);
+					url = FormatThumbnailTemplateUrl(Id, width, height);
 				}
 				else
 				{
@@ -81,22 +80,22 @@ namespace TwitchApiLib
 					.Replace("{height}", height.ToString());
 			}
 
-			return RetrievePreviewImage(url);
+			return ReceiveThumbnail(url);
 		}
 
-		public void DisposePreviewImageData()
+		public void DisposeThumbnailImageData()
 		{
-			if (PreviewImageData != null)
+			if (ThumbnailImageData != null)
 			{
-				PreviewImageData.Close();
-				PreviewImageData = null;
+				ThumbnailImageData.Close();
+				ThumbnailImageData = null;
 			}
 		}
 
-		public static string FormatPreviewImageTemplateUrl(ulong gameId, ushort width, ushort height)
+		public static string FormatThumbnailTemplateUrl(ulong gameId, ushort width, ushort height)
 		{
 			const ulong magicNumber = 509660UL;
-			string template = gameId <= magicNumber ? NON_GAME_PREVIEW_IMAGE_URL_TEMPLATE : GAME_PREVIEW_IMAGE_URL_TEMPLATE;
+			string template = gameId <= magicNumber ? NON_GAME_THUMBNAIL_URL_TEMPLATE : GAME_THUMBNAIL_URL_TEMPLATE;
 			return template.Replace("<id>", gameId.ToString())
 				.Replace("<width>", width.ToString())
 				.Replace("<height>", height.ToString());

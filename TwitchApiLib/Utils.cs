@@ -72,7 +72,7 @@ namespace TwitchApiLib
 					id = 0UL;
 				}
 
-				string boxArlUrl = id > 0UL ? TwitchGame.FormatPreviewImageTemplateUrl(id, 52, 72) : TwitchGame.UNKNOWN_GAME_BOXART_URL;
+				string boxArlUrl = id > 0UL ? TwitchGame.FormatThumbnailTemplateUrl(id, 52, 72) : TwitchGame.UNKNOWN_GAME_BOXART_URL;
 
 				return new TwitchGame(title, title, id, boxArlUrl, rawGameInfo);
 			}
