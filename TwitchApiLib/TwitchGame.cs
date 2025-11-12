@@ -16,6 +16,7 @@ namespace TwitchApiLib
 		public string RawData { get; }
 
 		public const string GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>_IGDB-<width>x<height>.jpg";
+		public const string NON_GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>-<width>x<height>.jpg";
 		public const string UNKNOWN_GAME_BOXART_URL = "https://static-cdn.jtvnw.net/ttv-boxart/404_boxart.png";
 
 		public TwitchGame(string title, string displayName, ulong id,
@@ -94,7 +95,9 @@ namespace TwitchApiLib
 
 		public static string FormatPreviewImageTemplateUrl(ulong gameId, ushort width, ushort height)
 		{
-			return GAME_PREVIEW_IMAGE_URL_TEMPLATE.Replace("<id>", gameId.ToString())
+			const ulong magicNumber = 509660UL;
+			string template = gameId <= magicNumber ? NON_GAME_PREVIEW_IMAGE_URL_TEMPLATE : GAME_PREVIEW_IMAGE_URL_TEMPLATE;
+			return template.Replace("<id>", gameId.ToString())
 				.Replace("<width>", width.ToString())
 				.Replace("<height>", height.ToString());
 		}
