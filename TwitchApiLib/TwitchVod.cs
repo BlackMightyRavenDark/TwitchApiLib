@@ -109,6 +109,7 @@ namespace TwitchApiLib
 				DateTime creationDate = Utils.ParseDateTime(createdAt);
 				string publishedAt = vodInfo.Value<string>("published_at");
 				DateTime publishedDate = Utils.ParseDateTime(publishedAt);
+				string durationString = vodInfo.Value<string>("duration");
 				string url = vodInfo.Value<string>("url");
 				string thumbnailTemplateUrl = vodInfo.Value<string>("thumbnail_url");
 				string viewable = vodInfo.Value<string>("viewable");
@@ -118,7 +119,7 @@ namespace TwitchApiLib
 
 				TwitchVodType vodType = Utils.GetVodType(vodTypeString);
 
-				TimeSpan duration = TimeSpan.Zero;
+				TimeSpan duration = Utils.ParseVodDuration(durationString);
 
 				TwitchUserResult twitchUserResult = TwitchUser.Get(userLogin);
 				DateTime deletionDate = DateTime.MaxValue;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 using static TwitchApiLib.TwitchApi;
@@ -457,6 +458,22 @@ namespace TwitchApiLib
 			}
 
 			return DateTime.MaxValue;
+		}
+
+		internal static TimeSpan ParseVodDuration(string hmsString)
+		{
+			int h = extract(hmsString, @"(\d{1,2})h");
+			int m = extract(hmsString, @"(\d{1,2})m");
+			int s = extract(hmsString, @"(\d{1,2})s");
+			return TimeSpan.FromSeconds(h * 3600 + m * 60 + s);
+
+			int extract(string inputString, string regexp)
+			{
+				Regex regex = new Regex(regexp);
+				Match match = regex.Match(inputString);
+				if (match.Success && int.TryParse(match.Groups[1].Value, out int n)) { return n; }
+				return 0;
+			}
 		}
 
 		public static int HttpGet_Helix(string url, out string response)
