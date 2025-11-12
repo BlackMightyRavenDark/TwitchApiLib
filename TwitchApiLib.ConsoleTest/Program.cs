@@ -103,6 +103,7 @@ namespace TwitchApiLib.ConsoleTest
 								if (vodResult.Vod.Game.IsKnown)
 								{
 									Console.WriteLine($"Game ID: {vodResult.Vod.Game.Id}");
+									Console.WriteLine($"Game boxart URL: {vodResult.Vod.Game.BoxArtUrl}");
 								}
 							}
 							else
