@@ -15,7 +15,7 @@ namespace TwitchApiLib
 		public Stream PreviewImageData { get; private set; }
 		public string RawData { get; }
 
-		public const string GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>-<width>x<height>.jpg";
+		public const string GAME_PREVIEW_IMAGE_URL_TEMPLATE = "https://static-cdn.jtvnw.net/ttv-boxart/<id>_IGDB-<width>x<height>.jpg";
 		public const string UNKNOWN_GAME_BOXART_URL = "https://static-cdn.jtvnw.net/ttv-boxart/404_boxart.png";
 
 		public TwitchGame(string title, string displayName, ulong id,

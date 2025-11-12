@@ -129,11 +129,10 @@ namespace TwitchApiLib
 					deletionDate = creationDate.AddDays(isPartner ? 60.0 : 14.0);
 				}
 
-				TwitchGame game = TwitchGame.CreateUnknownGame();
-
+				TwitchGameResult gameResult = TwitchApiGql.GetVodGameInfo(vodId.ToString());
 				TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetVodPlaybackAccessMode(vodId.ToString(), out _);
 
-				TwitchVod vod = new TwitchVod(vodId, title, description, duration, game, creationDate,
+				TwitchVod vod = new TwitchVod(vodId, title, description, duration, gameResult.Game, creationDate,
 					publishedDate, deletionDate, url, thumbnailTemplateUrl, viewable, viewCount,
 					language, vodType, playbackAccessMode, streamId, twitchUserResult.User,
 					vodInfo.ToString());
