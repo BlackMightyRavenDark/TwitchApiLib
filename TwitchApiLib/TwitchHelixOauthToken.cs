@@ -7,8 +7,10 @@ namespace TwitchApiLib
 	public class TwitchHelixOauthToken
 	{
 		public string AccessToken { get; private set; } = null;
+		public string AccessTokenType { get; private set; } = null;
 		public DateTime ExpirationDate { get; private set; } = DateTime.MinValue;
 		public DateTime LastUpdateDate { get; private set; } = DateTime.MinValue;
+		public string RawData { get; private set; } = null;
 
 		public const string TWITCH_HELIX_OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 
@@ -19,7 +21,7 @@ namespace TwitchApiLib
 
 		public void Reset()
 		{
-			AccessToken = null;
+			AccessToken = AccessTokenType = RawData = null;
 			ExpirationDate = LastUpdateDate = DateTime.MinValue;
 		}
 
@@ -41,7 +43,9 @@ namespace TwitchApiLib
 						return 400;
 					}
 
+					RawData = response;
 					AccessToken = json.Value<string>("access_token");
+					AccessTokenType = json.Value<string>("token_type");
 					long expiresIn = json.Value<long>("expires_in");
 					DateTime date = updateStarted.Add(TimeSpan.FromSeconds(expiresIn));
 					ExpirationDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, 0, DateTimeKind.Utc);
