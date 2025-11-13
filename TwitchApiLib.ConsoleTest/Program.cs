@@ -119,7 +119,7 @@ namespace TwitchApiLib.ConsoleTest
 							{
 								Console.WriteLine($"Deletion date: {vodResult.Vod.DeletionDate.FormatDateTime()}");
 							}
-							Console.WriteLine($"Url: {vodResult.Vod.Url}");
+							Console.WriteLine($"URL: {vodResult.Vod.Url}");
 							Console.WriteLine($"Access mode: {vodResult.Vod.PlaybackAccessMode}");
 							Console.WriteLine($"Thumbnail template URL: {vodResult.Vod.ThumbnailUrlTemplate}");
 							//TODO: Find a way to determine actual video resolution.
