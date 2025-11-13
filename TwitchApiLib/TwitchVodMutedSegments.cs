@@ -50,15 +50,16 @@ namespace TwitchApiLib
 			}
 		}
 
-		private string SegmentToString(List<TwitchVodChunk> segment, bool showChunkCount = false)
+		private static string SegmentToString(List<TwitchVodChunk> segment, bool showChunkCount = false)
 		{
 			if (segment != null && segment.Count > 0)
 			{
-				double segmentDuration = segment.Sum(item => item.Duration);
+				int chunkCount = segment.Count;
+				double segmentDuration = chunkCount > 1 ? segment.Sum(item => item.Duration) : segment[0].Duration;
 				TimeSpan start = TimeSpan.FromSeconds(segment[0].Offset);
 				TimeSpan end = TimeSpan.FromSeconds(segment[0].Offset + segmentDuration);
 				string t = $"{start:hh':'mm':'ss} - {end:hh':'mm':'ss}";
-				if (showChunkCount) { t += $" ({segment.Count} chunks)"; }
+				if (showChunkCount) { t += $" ({chunkCount} chunks)"; }
 				return t;
 			}
 
