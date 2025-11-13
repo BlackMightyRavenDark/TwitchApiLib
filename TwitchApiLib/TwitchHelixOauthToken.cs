@@ -37,6 +37,7 @@ namespace TwitchApiLib
 					if (json == null)
 					{
 						Reset();
+						TokenUpdated?.Invoke(this, 400);
 						return 400;
 					}
 
