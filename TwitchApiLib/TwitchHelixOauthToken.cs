@@ -6,10 +6,11 @@ namespace TwitchApiLib
 {
 	public class TwitchHelixOauthToken
 	{
-		public const string TWITCH_HELIX_OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
-
 		public string AccessToken { get; private set; } = null;
 		public DateTime ExpirationDate { get; private set; } = DateTime.MinValue;
+		public DateTime LastUpdateDate { get; private set; } = DateTime.MinValue;
+
+		public const string TWITCH_HELIX_OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 
 		public delegate void TwitchHelixOauthTokenUpdatingDelegate(object sender);
 		public delegate void TwitchHelixOauthTokenUpdatedDelegate(object sender, int errorCode);
@@ -19,12 +20,13 @@ namespace TwitchApiLib
 		public void Reset()
 		{
 			AccessToken = null;
-			ExpirationDate = DateTime.MinValue;
+			ExpirationDate = LastUpdateDate = DateTime.MinValue;
 		}
 
 		public int Update(string clientId, string secretKey)
 		{
 			TokenUpdating?.Invoke(this);
+			DateTime updateStarted = DateTime.UtcNow;
 			string url = FormatTokenUrl(clientId, secretKey);
 			int errorCode = Utils.HttpPost(url, out string response);
 			if (errorCode == 200)
@@ -40,8 +42,9 @@ namespace TwitchApiLib
 
 					AccessToken = json.Value<string>("access_token");
 					long expiresIn = json.Value<long>("expires_in");
-					DateTime date = DateTime.UtcNow.Add(TimeSpan.FromSeconds(expiresIn));
+					DateTime date = updateStarted.Add(TimeSpan.FromSeconds(expiresIn));
 					ExpirationDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, 0, DateTimeKind.Utc);
+					LastUpdateDate = updateStarted;
 
 					TokenUpdated?.Invoke(this, errorCode);
 					return errorCode;
