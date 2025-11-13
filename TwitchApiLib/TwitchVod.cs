@@ -155,7 +155,7 @@ namespace TwitchApiLib
 		public static TwitchVodResult Parse(string rawVodInfo)
 		{
 			JObject json = Utils.TryParseJson(rawVodInfo, out string errorMessage);
-			return json != null ? Parse(json) : new TwitchVodResult(null, 400, errorMessage, rawVodInfo);
+			return json != null ? Parse(json) : new TwitchVodResult(null, 400, $"Can't parse JSON! {errorMessage}", rawVodInfo);
 		}
 
 		private bool GetIsLive()
