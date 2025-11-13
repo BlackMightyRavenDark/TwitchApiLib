@@ -21,7 +21,7 @@ namespace TwitchApiLib
 		public static TwitchVodPageResult Get(ulong userId, uint maxVideos, string pageToken = null)
 		{
 			TwitchApplication application = GetApplication();
-			int errorCode = GetHelixOauthToken(application, out string token);
+			int errorCode = GetHelixOauthToken(application, out string token, out _);
 			if (errorCode == 200)
 			{
 				string url = GenerateChannelVideosRequestUrl(userId.ToString(), maxVideos, pageToken);

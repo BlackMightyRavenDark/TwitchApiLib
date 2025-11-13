@@ -25,7 +25,7 @@ namespace TwitchApiLib
 			ExpirationDate = LastUpdateDate = DateTime.MinValue;
 		}
 
-		public int Update(string clientId, string secretKey)
+		public int Update(string clientId, string secretKey, out string errorMessage)
 		{
 			TokenUpdating?.Invoke(this);
 			DateTime updateStarted = DateTime.UtcNow;
@@ -35,7 +35,7 @@ namespace TwitchApiLib
 			{
 				try
 				{
-					JObject json = Utils.TryParseJson(response);
+					JObject json = Utils.TryParseJson(response, out errorMessage);
 					if (json == null)
 					{
 						Reset();
@@ -54,27 +54,29 @@ namespace TwitchApiLib
 					TokenUpdated?.Invoke(this, errorCode);
 					return errorCode;
 				}
-#if DEBUG
 				catch (Exception ex)
 				{
+#if DEBUG
 					System.Diagnostics.Debug.WriteLine(ex.Message);
-#else
-				catch
-				{
 #endif
 					Reset();
 					TokenUpdated?.Invoke(this, 400);
+					errorMessage = ex.Message;
 					return 400;
 				}
+			}
+			else
+			{
+				errorMessage = response;
 			}
 
 			TokenUpdated?.Invoke(this, errorCode);
 			return errorCode;
 		}
 
-		public int Update(TwitchApplication application)
+		public int Update(TwitchApplication application, out string errorMessage)
 		{
-			return Update(application.ClientId, application.ClientSecretKey);
+			return Update(application.ClientId, application.ClientSecretKey, out errorMessage);
 		}
 
 		public bool IsExpired()

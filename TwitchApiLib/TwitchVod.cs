@@ -69,7 +69,7 @@ namespace TwitchApiLib
 		public static TwitchVodResult Get(ulong vodId)
 		{
 			string url = Utils.GenerateVodInfoRequestUrl(vodId);
-			int errorCode = Utils.HttpGet_Helix(url, out string response);
+			int errorCode = Utils.HttpGet_Helix(url, out string response, out _);
 			if (errorCode == 200)
 			{
 				JObject json = Utils.TryParseJson(response, out string parsingResult);

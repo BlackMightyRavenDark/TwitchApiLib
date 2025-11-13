@@ -164,7 +164,7 @@ namespace TwitchApiLib
 
 		private static int FindRawUserInfoByUrl(string url, out JObject result)
 		{
-			int errorCode = HttpGet_Helix(url, out string response);
+			int errorCode = HttpGet_Helix(url, out string response, out _);
 			if (errorCode == 200)
 			{
 				result = TryParseJson(response);
@@ -222,31 +222,32 @@ namespace TwitchApiLib
 			return TwitchVodType.Unknown;
 		}
 
-		public static int GetHelixOauthToken(string clientId, string clientSecretKey, out string responseToken)
+		public static int GetHelixOauthToken(string clientId, string clientSecretKey, out string responseToken, out string errorMessage)
 		{
 			lock (TwitchHelixOauthToken)
 			{
-				int errorCode = TwitchHelixOauthToken.IsExpired() ? TwitchHelixOauthToken.Update(clientId, clientSecretKey) : 200;
+				errorMessage = null;
+				int errorCode = TwitchHelixOauthToken.IsExpired() ? TwitchHelixOauthToken.Update(clientId, clientSecretKey, out errorMessage) : 200;
 				responseToken = errorCode == 200 ? TwitchHelixOauthToken.AccessToken : null;
 				return errorCode;
 			}
 		}
 
-		public static int GetHelixOauthToken(TwitchApplication application, out string responseToken)
+		public static int GetHelixOauthToken(TwitchApplication application, out string responseToken, out string errorMessage)
 		{
-			return GetHelixOauthToken(application.ClientId, application.ClientSecretKey, out responseToken);
+			return GetHelixOauthToken(application.ClientId, application.ClientSecretKey, out responseToken, out errorMessage);
 		}
 
-		public static int GetHelixOauthToken(out string responseToken)
+		public static int GetHelixOauthToken(out string responseToken, out string errorMessage)
 		{
 			TwitchApplication application = GetApplication();
-			return GetHelixOauthToken(application, out responseToken);
+			return GetHelixOauthToken(application, out responseToken, out errorMessage);
 		}
 
 		public static TwitchChannelLiveInfoResult GetChannelLiveInfo_Helix(ulong channelId)
 		{
 			string url = GenerateChannelLiveInfoRequestUrl(channelId);
-			int errorCode = HttpGet_Helix(url, out string response);
+			int errorCode = HttpGet_Helix(url, out string response, out _);
 			if (errorCode == 200)
 			{
 				JObject json = TryParseJson(response);
@@ -476,10 +477,10 @@ namespace TwitchApiLib
 			}
 		}
 
-		public static int HttpGet_Helix(string url, out string response)
+		public static int HttpGet_Helix(string url, out string response, out string errorMessage)
 		{
 			TwitchApplication application = GetApplication();
-			int errorCode = GetHelixOauthToken(application, out string token);
+			int errorCode = GetHelixOauthToken(application, out string token, out errorMessage);
 			if (errorCode == 200)
 			{
 				FileDownloader d = MakeTwitchApiBearerClient(application.ClientId, token);
