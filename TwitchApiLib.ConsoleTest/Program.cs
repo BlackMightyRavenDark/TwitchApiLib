@@ -114,8 +114,7 @@ namespace TwitchApiLib.ConsoleTest
 							}
 							Console.WriteLine($"Creation date: {vodResult.Vod.CreationDate.FormatDateTime()}");
 							Console.WriteLine($"Published date: {vodResult.Vod.PublishedDate.FormatDateTime()}");
-							if (vodResult.Vod.VodType != TwitchApi.TwitchVodType.Highlight &&
-								vodResult.Vod.DeletionDate < DateTime.MaxValue)
+							if (vodResult.Vod.WillBeDeleted)
 							{
 								Console.WriteLine($"Deletion date: {vodResult.Vod.DeletionDate.FormatDateTime()}");
 							}

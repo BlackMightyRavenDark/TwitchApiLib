@@ -33,6 +33,7 @@ namespace TwitchApiLib
 		public bool IsHighlight => VodType == TwitchVodType.Highlight;
 		public bool IsUpload => VodType == TwitchVodType.Upload;
 		public bool IsSubscribersOnly => PlaybackAccessMode == TwitchPlaybackAccessMode.SubscribersOnly;
+		public bool WillBeDeleted => VodType != TwitchVodType.Highlight && DeletionDate > DateTime.MinValue && DeletionDate < DateTime.MaxValue;
 
 		public TwitchVod(ulong id, string title, string description, TimeSpan duration,
 			TwitchGame game, DateTime creationDate, DateTime publishedDate, DateTime deletionDate,
