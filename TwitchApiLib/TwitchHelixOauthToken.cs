@@ -34,8 +34,7 @@ namespace TwitchApiLib
 					JObject json = Utils.TryParseJson(response);
 					if (json == null)
 					{
-						AccessToken = null;
-						ExpirationDate = DateTime.MinValue;
+						Reset();
 						return 400;
 					}
 
@@ -55,8 +54,7 @@ namespace TwitchApiLib
 				catch
 				{
 #endif
-					AccessToken = null;
-					ExpirationDate = DateTime.MinValue;
+					Reset();
 					TokenUpdated?.Invoke(this, 400);
 					return 400;
 				}
