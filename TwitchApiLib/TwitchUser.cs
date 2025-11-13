@@ -53,7 +53,7 @@ namespace TwitchApiLib
 			if (getFromCache && _twitchUserLogins.ContainsKey(userLogin) &&
 				_twitchUserLogins.TryGetValue(userLogin, out TwitchUser cachedUser))
 			{
-				return new TwitchUserResult(cachedUser, 200);
+				return new TwitchUserResult(cachedUser, 200, null, null);
 			}
 
 			int errorCode = FindRawUserInfo(userLogin, out JObject response);
@@ -69,7 +69,7 @@ namespace TwitchApiLib
 				}
 			}
 
-			return new TwitchUserResult(null, errorCode);
+			return new TwitchUserResult(null, errorCode, null, response?.ToString());
 		}
 
 		public static TwitchUserResult Get(ulong userId, bool getFromCache = true)
@@ -77,7 +77,7 @@ namespace TwitchApiLib
 			if (getFromCache && _twitchUserIds.ContainsKey(userId) &&
 				_twitchUserIds.TryGetValue(userId, out TwitchUser cachedUser))
 			{
-				return new TwitchUserResult(cachedUser, 200);
+				return new TwitchUserResult(cachedUser, 200, null, null);
 			}
 
 			int errorCode = FindRawUserInfo(userId, out JObject response);
@@ -93,7 +93,7 @@ namespace TwitchApiLib
 				}
 			}
 
-			return new TwitchUserResult(null, errorCode);
+			return new TwitchUserResult(null, errorCode, null, response?.ToString());
 		}
 
 		public JArray GetVideosRaw(uint maxVideos, uint videosPerPage = 10U)
@@ -241,30 +241,39 @@ namespace TwitchApiLib
 
 		public static TwitchUserResult Parse(JObject json)
 		{
-			ulong userId = json.Value<ulong>("id");
-			string userLogin = json.Value<string>("login");
-			string displayName = json.Value<string>("display_name");
-			string userType = json.Value<string>("type");
-			string broadcasterTypeString = json.Value<string>("broadcaster_type");
-			string description = json.Value<string>("description");
-			string profileImageUrl = json.Value<string>("profile_image_url");
-			string offlineImageUrl = json.Value<string>("offline_image_url");
-			ulong viewCount = json.Value<ulong>("view_count");
-			string createdAt = json.Value<string>("created_at");
-			DateTime creationDate = ParseDateTime(createdAt);
+			try
+			{
+				ulong userId = json.Value<ulong>("id");
+				string userLogin = json.Value<string>("login");
+				string displayName = json.Value<string>("display_name");
+				string userType = json.Value<string>("type");
+				string broadcasterTypeString = json.Value<string>("broadcaster_type");
+				string description = json.Value<string>("description");
+				string profileImageUrl = json.Value<string>("profile_image_url");
+				string offlineImageUrl = json.Value<string>("offline_image_url");
+				ulong viewCount = json.Value<ulong>("view_count");
+				string createdAt = json.Value<string>("created_at");
+				DateTime creationDate = ParseDateTime(createdAt);
 
-			TwitchBroadcasterType broadcasterType = GetBroadcasterType(broadcasterTypeString);
-			TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetChannelPlaybackAccessMode(userLogin, out _);
+				TwitchBroadcasterType broadcasterType = GetBroadcasterType(broadcasterTypeString);
+				TwitchPlaybackAccessMode playbackAccessMode = TwitchApiGql.GetChannelPlaybackAccessMode(userLogin, out _);
 
-			TwitchUser user = new TwitchUser(userId, userLogin, displayName, userType, broadcasterType, playbackAccessMode,
-				description, profileImageUrl, offlineImageUrl, viewCount, creationDate, json.ToString());
-			return new TwitchUserResult(user, 200);
+				TwitchUser user = new TwitchUser(userId, userLogin, displayName, userType, broadcasterType, playbackAccessMode,
+					description, profileImageUrl, offlineImageUrl, viewCount, creationDate, json.ToString());
+				return new TwitchUserResult(user, 200, null, json.ToString());
+			} catch (Exception ex)
+			{
+#if DEBUG
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+#endif
+				return new TwitchUserResult(null, ex.HResult, ex.Message, json?.ToString());
+			}
 		}
 
 		public static TwitchUserResult Parse(string rawData)
 		{
-			JObject json = TryParseJson(rawData);
-			return json != null ? Parse(json) : new TwitchUserResult(null, 400);
+			JObject json = TryParseJson(rawData, out string errorMessage);
+			return json != null ? Parse(json) : new TwitchUserResult(null, 400, $"Can't parse JSON! {errorMessage}", null);
 		}
 
 		public static TwitchUserResult ParseUserSearchResult(JObject searchResult)
@@ -272,7 +281,7 @@ namespace TwitchApiLib
 			JArray jaData = searchResult?.Value<JArray>("data");
 			if (jaData == null || jaData.Count == 0)
 			{
-				return new TwitchUserResult(null, 404);
+				return new TwitchUserResult(null, 404, "No 'data' key found", null);
 			}
 
 			return Parse(jaData[0] as JObject);
