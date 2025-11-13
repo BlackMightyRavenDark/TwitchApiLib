@@ -15,7 +15,7 @@ namespace TwitchApiLib
 		public const string TWITCH_HELIX_OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 
 		public delegate void TwitchHelixOauthTokenUpdatingDelegate(object sender);
-		public delegate void TwitchHelixOauthTokenUpdatedDelegate(object sender, int errorCode);
+		public delegate void TwitchHelixOauthTokenUpdatedDelegate(object sender, int errorCode, string errorMessage);
 		public TwitchHelixOauthTokenUpdatingDelegate TokenUpdating { get; set; }
 		public TwitchHelixOauthTokenUpdatedDelegate TokenUpdated { get; set; }
 
@@ -39,7 +39,7 @@ namespace TwitchApiLib
 					if (json == null)
 					{
 						Reset();
-						TokenUpdated?.Invoke(this, 400);
+						TokenUpdated?.Invoke(this, 400, errorMessage);
 						return 400;
 					}
 
@@ -51,17 +51,17 @@ namespace TwitchApiLib
 					ExpirationDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, 0, DateTimeKind.Utc);
 					LastUpdateDate = updateStarted;
 
-					TokenUpdated?.Invoke(this, errorCode);
+					TokenUpdated?.Invoke(this, errorCode, null);
 					return errorCode;
 				}
 				catch (Exception ex)
 				{
+					errorMessage = ex.Message;
 #if DEBUG
-					System.Diagnostics.Debug.WriteLine(ex.Message);
+					System.Diagnostics.Debug.WriteLine(errorMessage);
 #endif
 					Reset();
-					TokenUpdated?.Invoke(this, 400);
-					errorMessage = ex.Message;
+					TokenUpdated?.Invoke(this, 400, errorMessage);
 					return 400;
 				}
 			}
@@ -70,7 +70,7 @@ namespace TwitchApiLib
 				errorMessage = response;
 			}
 
-			TokenUpdated?.Invoke(this, errorCode);
+			TokenUpdated?.Invoke(this, errorCode, errorMessage);
 			return errorCode;
 		}
 

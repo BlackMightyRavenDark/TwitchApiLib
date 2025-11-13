@@ -34,7 +34,7 @@ namespace TwitchApiLib.ConsoleTest
 				TwitchApi.SetUserAgent(userAgent);
 
 				Utils.TwitchHelixOauthToken.TokenUpdating += s => Console.WriteLine("Twitch Helix API token is updating...");
-				Utils.TwitchHelixOauthToken.TokenUpdated += (s, errorCode) =>
+				Utils.TwitchHelixOauthToken.TokenUpdated += (s, errorCode, errorMessage) =>
 				{
 					if (errorCode == 200)
 					{
@@ -43,7 +43,9 @@ namespace TwitchApiLib.ConsoleTest
 					}
 					else
 					{
-						Console.WriteLine($"There is an error while updating the Twitch Helix API token! Code {errorCode}.");
+						string t = $"There is an error while updating the Twitch Helix API token! Code {errorCode}.";
+						if (!string.IsNullOrEmpty(errorMessage)) { t += $" {errorMessage}"; }
+						Console.WriteLine(t);
 					}
 				};
 
