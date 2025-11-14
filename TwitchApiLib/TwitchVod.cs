@@ -233,11 +233,6 @@ namespace TwitchApiLib
 				.Replace("%{height}", imageHeight.ToString());
 		}
 
-		public TwitchVodMutedSegments GetMutedSegments(bool showChunkCount = false)
-		{
-			return Playlist?.GetMutedSegments(showChunkCount);
-		}
-
 		public int ReceiveThumbnail(ushort width, ushort height)
 		{
 			if (ThumbnailImageData != null) { return 200; }
