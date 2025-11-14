@@ -185,15 +185,19 @@ namespace TwitchApiLib
 			int errorCode = GeneratePlaylistUrl(out string playlistUrl, formatId);
 			if (errorCode == 200)
 			{
-				errorCode = Utils.DownloadString(playlistUrl, out string playlistRaw);
+				errorCode = Utils.DownloadString(playlistUrl, out string response);
 				if (errorCode == 200)
 				{
-					TwitchVodPlaylist playlist = new TwitchVodPlaylist(playlistRaw, playlistUrl, null);
-					return new TwitchVodPlaylistResult(playlist, 200);
+					TwitchVodPlaylist playlist = new TwitchVodPlaylist(response, playlistUrl, null);
+					return new TwitchVodPlaylistResult(playlist, 200, null);
+				}
+				else
+				{
+					return new TwitchVodPlaylistResult(null, errorCode, response);
 				}
 			}
 
-			return new TwitchVodPlaylistResult(null, errorCode);
+			return new TwitchVodPlaylistResult(null, errorCode, null);
 		}
 
 		public int GetPlaybackAccessToken(out ITwitchPlaybackAccessToken token, out string errorMessage)

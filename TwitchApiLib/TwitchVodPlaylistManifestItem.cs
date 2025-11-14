@@ -53,12 +53,12 @@ namespace TwitchApiLib
 			{
 				int errorCode = Utils.DownloadString(PlaylistUrl, out string response);
 				TwitchVodPlaylistResult playlistResult = errorCode == 200 ?
-					new TwitchVodPlaylistResult(new TwitchVodPlaylist(response, null, this), 200) :
-					new TwitchVodPlaylistResult(null, errorCode);
+					new TwitchVodPlaylistResult(new TwitchVodPlaylist(response, null, this), 200, null) :
+					new TwitchVodPlaylistResult(null, errorCode, response);
 				return playlistResult;
 			}
 
-			return new TwitchVodPlaylistResult(null, 400);
+			return new TwitchVodPlaylistResult(null, 400, null);
 		}
 
 		public int UpdatePlaylist(out string errorMessage, bool autoParsePlaylist = true)
