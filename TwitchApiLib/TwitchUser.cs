@@ -64,9 +64,9 @@ namespace TwitchApiLib
 				{
 					_twitchUserLogins[userLogin] = userResult.User;
 					_twitchUserIds[userResult.User.Id] = userResult.User;
-
-					return userResult;
 				}
+
+				return userResult;
 			}
 
 			return new TwitchUserResult(null, errorCode, null, response?.ToString());
@@ -88,9 +88,9 @@ namespace TwitchApiLib
 				{
 					_twitchUserLogins[userResult.User.Login] = userResult.User;
 					_twitchUserIds[userId] = userResult.User;
-
-					return userResult;
 				}
+
+				return userResult;
 			}
 
 			return new TwitchUserResult(null, errorCode, null, response?.ToString());
